@@ -3,6 +3,10 @@ package services
 import (
 	"database/sql"
 	"fmt"
+	"github.com/boombuler/barcode"
+	"github.com/boombuler/barcode/code128"
+	"image/png"
+	"os"
 	"time"
 )
 
@@ -97,12 +101,13 @@ func (agent DBAgent) AuthenticateUser(username string, password string) (*Status
 	return result, user.UserID
 }
 
-func (agent DBAgent) RegisterUser(username string, password string) *StatusResult {
+func (agent DBAgent) RegisterUser(username string, password string) (*StatusResult, *os.File) {
 	result := &StatusResult{}
+	emptyfile, _ := os.Open("1.png")
 	if agent.HasUser(username) {
 		result.Status = UsernameExist
 		result.Msg = "用户名已经存在"
-		return result
+		return result, emptyfile
 	}
 	command := fmt.Sprintf("insert INTO user(username, password) values('%v','%v')", username, password)
 	_, err := agent.DB.Exec(command)
@@ -110,11 +115,12 @@ func (agent DBAgent) RegisterUser(username string, password string) *StatusResul
 		result.Status = RegisterError
 		result.Msg = "注册失败"
 		fmt.Println(err.Error())
-		return result
+		return result, emptyfile
 	}
+	file := agent.GetUserBarcode(username)
 	result.Status = RegisterOK
 	result.Msg = "注册成功"
-	return result
+	return result, file
 }
 
 func (agent DBAgent) HasUser(username string) bool {
@@ -129,6 +135,19 @@ func (agent DBAgent) HasUser(username string) bool {
 		}
 	}
 	return true
+}
+
+func (agent DBAgent) GetUserBarcode(username string) *os.File {
+	// 创建一个code128编码的 BarcodeIntCS
+	cs, _ := code128.Encode(username)
+	// 创建一个要输出数据的文件
+	file, _ := os.Create(username + ".png")
+	defer file.Close()
+	// 设置图片像素大小
+	qrCode, _ := barcode.Scale(cs, 350, 70)
+	// 将code128的条形码编码为png图片
+	png.Encode(file, qrCode)
+	return file
 }
 
 func (agent DBAgent) GetBookNum() int {

@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f809108a-1921-4486-bc49-f57b44597639" name="Default Changelist" comment="1.ISBN检索器独立为文件&#10;2.ISBN检索器增加中文书籍检索，检索前填写极客API">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="f809108a-1921-4486-bc49-f57b44597639" name="Default Changelist" comment="注册时返回条形码">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/httpServer.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/httpServer.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/services.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/services.go" afterDir="false" />
     </list>
@@ -63,27 +64,16 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultGoTemplateProperty": "Go File",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.go.format.on.save.advertiser.fired": "true",
-    "RunOnceActivity.go.formatter.settings.were.checked": "true",
-    "RunOnceActivity.go.migrated.go.modules.settings": "true",
-    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "RunOnceActivity.go.watchers.conflict.with.on.save.actions.check.performed": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "go.import.settings.migrated": "true",
-    "go.sdk.automatically.set": "true",
-    "last_opened_file_path": "F:/Project/Library-Management-Backend",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "settings.editor.selected.configurable": "http.proxy"
-  }
-}]]></component>
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="go.format.on.save.advertiser.fired" value="true" />
+    <property name="go.formatter.settings.were.checked" value="true" />
+    <property name="go.import.settings.migrated" value="true" />
+    <property name="go.modules.go.list.on.any.changes.was.set" value="true" />
+    <property name="go.watchers.conflict.with.on.save.actions.check.performed" value="true" />
+    <property name="last_opened_file_path" value="$USER_HOME$" />
+    <property name="settings.editor.selected.configurable" value="go.vgo" />
+  </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\WorkSpace\go\lms\util" />
@@ -91,6 +81,14 @@
     </key>
   </component>
   <component name="RunManager" selected="Go Test.TestGetMetaDataByISBN in lms/services (2)">
+    <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="lms" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="FILE" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
     <configuration name="TestGetMetaDataByISBN in lms/services (1)" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="lms" />
       <working_directory value="$PROJECT_DIR$/services" />
@@ -151,6 +149,15 @@
       <pattern value="^\QTestGetMetaDataByISBN\E$/^\Qreal_analysis\E$" />
       <method v="2" />
     </configuration>
+    <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
+      <module name="lms" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="DIRECTORY" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Go Test.TestGetMetaDataByISBN in lms/services (2)" />
@@ -170,19 +177,7 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State>
-              <option name="FILTERS">
-                <map>
-                  <entry key="branch">
-                    <value>
-                      <list>
-                        <option value="feature_addbook" />
-                      </list>
-                    </value>
-                  </entry>
-                </map>
-              </option>
-            </State>
+            <State />
           </value>
         </entry>
       </map>
@@ -192,9 +187,10 @@
     <MESSAGE value="add ISBN retriever" />
     <MESSAGE value="1.ISBN检索器独立为文件" />
     <MESSAGE value="1.ISBN检索器独立为文件&#10;2.ISBN检索器增加中文书籍检索，检索前填写极客API" />
-    <option name="LAST_COMMIT_MESSAGE" value="1.ISBN检索器独立为文件&#10;2.ISBN检索器增加中文书籍检索，检索前填写极客API" />
+    <MESSAGE value="注册时返回条形码" />
+    <option name="LAST_COMMIT_MESSAGE" value="注册时返回条形码" />
   </component>
   <component name="VgoProject">
-    <settings-migrated>true</settings-migrated>
+    <integration-enabled>true</integration-enabled>
   </component>
 </project>

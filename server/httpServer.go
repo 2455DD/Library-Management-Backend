@@ -46,8 +46,8 @@ func adminLoginHandler(context *gin.Context) {
 func registerHandler(context *gin.Context) {
 	username := context.PostForm("username")
 	password := context.PostForm("password")
-	registerResult := agent.RegisterUser(username, password)
-	context.JSON(http.StatusOK, gin.H{"status": registerResult.Status, "msg": registerResult.Msg})
+	registerResult, file := agent.RegisterUser(username, password)
+	context.JSON(http.StatusOK, gin.H{"status": registerResult.Status, "msg": registerResult.Msg, "file": file})
 }
 
 func getCountHandler(context *gin.Context) {
