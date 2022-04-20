@@ -3,11 +3,7 @@ package services
 import (
 	"database/sql"
 	"fmt"
-	"github.com/boombuler/barcode"
-	"github.com/boombuler/barcode/code128"
-	"image/png"
-	"os"
-	"path/filepath"
+	"strconv"
 	"time"
 )
 
@@ -108,15 +104,10 @@ func (agent DBAgent) AuthenticateUser(username string, password string) (*Status
 	return result, user.UserID
 }
 
-func (agent DBAgent) RegisterUser(username string, password string) (*StatusResult, string) {
+func (agent DBAgent) RegisterUser(userid string, password string) (*StatusResult, string) {
 	result := &StatusResult{}
-	if agent.HasUser(username) {
-		result.Status = UsernameExist
-		result.Msg = "用户名已经存在"
-		return result, ""
-	}
-	command := fmt.Sprintf("insert INTO user(username, password) values('%v','%v')", username, password)
-	_, err := agent.DB.Exec(command)
+
+	useridInt, err := strconv.Atoi(userid)
 	if err != nil {
 		result.Status = RegisterError
 		result.Msg = "注册失败"
@@ -124,7 +115,22 @@ func (agent DBAgent) RegisterUser(username string, password string) (*StatusResu
 		return result, ""
 	}
 
-	path, getBarcodeResult := agent.GetUserBarcodePath(username)
+	if agent.HasUser(useridInt) {
+		result.Status = UsernameExist
+		result.Msg = "用户ID已经存在"
+		return result, ""
+	}
+
+	command := fmt.Sprintf("insert INTO user(username, password) values('%v','%v')", userid, password)
+	_, err = agent.DB.Exec(command)
+	if err != nil {
+		result.Status = RegisterError
+		result.Msg = "注册失败"
+		fmt.Println(err.Error())
+		return result, ""
+	}
+
+	path, getBarcodeResult := agent.GetUserBarcodePath(useridInt)
 	if (path == "fail") || (getBarcodeResult.Status == UserBarcodeFailed) {
 		return &StatusResult{
 			Msg:    "获取用户条形码存储路径失败",
@@ -138,100 +144,18 @@ func (agent DBAgent) RegisterUser(username string, password string) (*StatusResu
 	return result, path
 }
 
-func (agent DBAgent) HasUser(username string) bool {
+func (agent DBAgent) HasUser(userid int) bool {
 	user := new(User)
-	row := agent.DB.QueryRow(fmt.Sprintf("select username from user where username='%v'", username))
+	row := agent.DB.QueryRow(fmt.Sprintf("select username from user where id='%v'", userid))
 	err := row.Scan(&user.Username)
 	if err != nil {
-		row = agent.DB.QueryRow(fmt.Sprintf("select username from admin where username='%v'", username))
+		row = agent.DB.QueryRow(fmt.Sprintf("select username from admin where id='%v'", userid))
 		err := row.Scan(&user.Username)
 		if err != nil {
 			return false
 		}
 	}
 	return true
-}
-
-func (agent DBAgent) GetUserBarcodePath(username string) (string, *StatusResult) {
-	//检查用户的username是否在数据库中
-	if !agent.HasUser(username) {
-		return "fail", &StatusResult{
-			Msg:    "数据库中不存在该username",
-			Status: UserBarcodeFailed,
-		}
-	}
-
-	var path string
-	row := agent.DB.QueryRow(fmt.Sprintf("SELECT barcode_path from user_barcode WHERE id='%v';", username))
-	err := row.Scan(&path)
-	if err != nil {
-		return "fail", &StatusResult{
-			Msg:    "用户条形码不存在",
-			Status: UserBarcodeFailed,
-		}
-	}
-	return path, &StatusResult{
-		Msg:    "成功获取",
-		Status: UserBarcodeOK,
-	}
-
-}
-
-func (agent DBAgent) StoreUserBarcodePath(username string) *StatusResult {
-	//检查用户的username是否在数据库中
-	if !agent.HasUser(username) {
-		return &StatusResult{
-			Msg:    "数据库中不存在该username",
-			Status: UserBarcodeFailed,
-		}
-	}
-
-	path, generateResult := agent.GenerateUserBarcode(username)
-	if (path == "fail") || (generateResult.Status == UserBarcodeFailed) {
-		return &StatusResult{
-			Msg:    "生成用户条形码失败",
-			Status: UserBarcodeFailed,
-		}
-	}
-
-	return &StatusResult{
-		Msg:    "生成用户条形码失败",
-		Status: UserBarcodeFailed,
-	}
-
-}
-
-func (agent DBAgent) GenerateUserBarcode(username string) (string, *StatusResult) {
-	result := &StatusResult{}
-
-	//创建一个code128编码的 BarcodeIntCS
-	cs, err := code128.Encode(username)
-	if err != nil {
-		result.Status = UserBarcodeFailed
-		result.Msg = "用户条形码编码失败"
-		return "fail", result
-	}
-
-	//创建一个要输出数据的文件
-	path := filepath.Join(mediaPath, fmt.Sprintf("%v.png", username))
-	file, err := os.Create(path)
-	if err != nil {
-		result.Status = UserBarcodeFailed
-		result.Msg = "生成用户二维码PNG文件失败"
-		return "fail", result
-	}
-
-	defer file.Close()
-
-	// 设置图片像素大小
-	qrCode, _ := barcode.Scale(cs, 350, 70)
-	// 将code128的条形码编码为png图片
-	png.Encode(file, qrCode)
-
-	result.Status = UserBarcodeOK
-	result.Msg = "用户二维码生成成功"
-
-	return path, result
 }
 
 func (agent DBAgent) GetBookNum() int {
