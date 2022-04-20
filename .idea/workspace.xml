@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f809108a-1921-4486-bc49-f57b44597639" name="Default Changelist" comment="注册时返回条形码-2">
+    <list default="true" id="f809108a-1921-4486-bc49-f57b44597639" name="Default Changelist" comment="注册时返回条形码-4">
+      <change afterPath="$PROJECT_DIR$/services/renew.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/httpServer.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/httpServer.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/UserBarcode.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/userBarcode.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/services.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/services.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -176,7 +177,9 @@
     <MESSAGE value="注册时返回条形码" />
     <MESSAGE value="注册时返回条形码-1" />
     <MESSAGE value="注册时返回条形码-2" />
-    <option name="LAST_COMMIT_MESSAGE" value="注册时返回条形码-2" />
+    <MESSAGE value="注册时返回条形码-3" />
+    <MESSAGE value="注册时返回条形码-4" />
+    <option name="LAST_COMMIT_MESSAGE" value="注册时返回条形码-4" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>

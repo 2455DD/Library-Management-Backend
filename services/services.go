@@ -56,6 +56,8 @@ const (
 	DeleteOK
 	UserBarcodeFailed
 	UserBarcodeOK
+	RenewFailed
+	RenewOK
 )
 
 var (

@@ -10,11 +10,10 @@ import (
 	"strconv"
 )
 
-// 获取用户条形码存储路径
+// GetUserBarcodePath 获取用户条形码存储路径
 // para: userid-用户ID
-// return: string-barcode存储路径,  StatusResult-状态码
+// return: string-barcode存储路径,  *StatusResult-操作结果
 //         获取用户二维码路径失败时, string="fail", StatusResult.Status=UserBarcodeFailed
-
 func (agent DBAgent) GetUserBarcodePath(userid int) (string, *StatusResult) {
 	//检查用户的userid是否在数据库中
 	if !agent.HasUser(userid) {
@@ -41,10 +40,9 @@ func (agent DBAgent) GetUserBarcodePath(userid int) (string, *StatusResult) {
 
 }
 
-// 处理sql语句
+// EscapeForSQL 处理sql语句
 // para: sql-待处理的部分sql语句（条形码存储路径）
 // return: string-处理过转义字符的sql语句
-
 func EscapeForSQL(sql string) string {
 	dest := make([]byte, 0, 2*len(sql))
 	var escape byte
@@ -86,10 +84,9 @@ func EscapeForSQL(sql string) string {
 	return string(dest)
 }
 
-// 生成（调用GenerateUserBarcode）并存储用户条形码
+// StoreUserBarcodePath 生成（调用GenerateUserBarcode）并存储用户条形码
 // para: userid-用户ID
-// return: StatusResult-状态码
-
+// return: *StatusResult-操作结果
 func (agent DBAgent) StoreUserBarcodePath(userid int) *StatusResult {
 	//检查用户的userid是否在数据库中
 	if !agent.HasUser(userid) {
@@ -161,10 +158,9 @@ func (agent DBAgent) StoreUserBarcodePath(userid int) *StatusResult {
 
 }
 
-// 生成用户条形码
+// GenerateUserBarcode 生成用户条形码
 // para: userid-用户ID
-// return: StatusResult-状态码
-
+// return: *StatusResult-操作结果
 func (agent DBAgent) GenerateUserBarcode(userid int) (string, *StatusResult) {
 	result := &StatusResult{}
 
