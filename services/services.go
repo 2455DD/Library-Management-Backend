@@ -123,7 +123,7 @@ func (agent DBAgent) RegisterUser(userid string, password string) (*StatusResult
 		return result, ""
 	}
 
-	command := fmt.Sprintf("insert INTO user(username, password) values('%v','%v')", userid, password)
+	command := fmt.Sprintf("insert INTO user(id, password) values('%v','%v')", userid, password)
 	_, err = agent.DB.Exec(command)
 	if err != nil {
 		result.Status = RegisterError
@@ -148,7 +148,7 @@ func (agent DBAgent) RegisterUser(userid string, password string) (*StatusResult
 
 func (agent DBAgent) HasUser(userid int) bool {
 	user := new(User)
-	row := agent.DB.QueryRow(fmt.Sprintf("select username from user where id='%v'", userid))
+	row := agent.DB.QueryRow(fmt.Sprintf("select id from user where id='%v'", userid))
 	err := row.Scan(&user.Username)
 	if err != nil {
 		row = agent.DB.QueryRow(fmt.Sprintf("select username from admin where id='%v'", userid))

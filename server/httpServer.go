@@ -9,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-ini/ini"
 	_ "github.com/go-sql-driver/mysql"
-	"lms/middleware"
 	. "lms/services"
 	"lms/util"
 	"log"
@@ -44,8 +43,8 @@ func adminLoginHandler(context *gin.Context) {
 }
 
 func registerHandler(context *gin.Context) {
-	userid := context.PostForm("userid")
-	password := context.PostForm("password")
+	userid := context.Query("userid")
+	password := context.Query("password")
 	registerResult, file := agent.RegisterUser(userid, password)
 	context.JSON(http.StatusOK, gin.H{"status": registerResult.Status, "msg": registerResult.Msg, "file": file})
 }
@@ -203,42 +202,49 @@ func loadConfig(configPath string) {
 
 }
 
+func testHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{
+		"status": "get",
+	})
+}
+
 func startService(port int, path string, staticPath string) {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
+	router.GET("/test", testHandler)
 	//router.LoadHTMLFiles(fmt.Sprintf("%v/index.html", path))
 	//router.Use(static.Serve("/static", static.LocalFile(staticPath, true)))
 
-	router.GET("/", func(context *gin.Context) {
-		context.HTML(http.StatusOK, "index.html", nil)
-	})
+	//router.GET("/", func(context *gin.Context) {
+	//	context.HTML(http.StatusOK, "index.html", nil)
+	//})
 	//router.GET("/test", func(context *gin.Context) {
 	//	context.String(http.StatusOK, "test")
 	//})
 
-	g1 := router.Group("/")
-	g1.Use(middleware.UserAuth())
-	{
-		g1.POST("/getUserBooks", getUserBooksHandler)
-		g1.POST("/getBorrowTime", getBorrowTimeHandler)
-		g1.POST("/borrowBook", borrowBookHandler)
-		g1.POST("/returnBook", returnBookHandler)
-	}
-
-	g2 := router.Group("/")
-	g2.Use(middleware.AdminAuth())
-	{
-		g2.POST("/updateBookStatus", updateBookStatusHandler)
-		g2.POST("/deleteBook", deleteBookHandler)
-		g2.POST("/addBook", addBookHandler)
-	}
-	router.POST("/login", loginHandler)
-	router.POST("/admin", adminLoginHandler)
-	router.POST("/register", registerHandler)
-	router.GET("/getCount", getCountHandler)
-	router.GET("/getBooks", getBooksHandler)
-	router.POST("/getBooks", getBooksHandler)
+	//g1 := router.Group("/")
+	//g1.Use(middleware.UserAuth())
+	//{
+	//	g1.POST("/getUserBooks", getUserBooksHandler)
+	//	g1.POST("/getBorrowTime", getBorrowTimeHandler)
+	//	g1.POST("/borrowBook", borrowBookHandler)
+	//	g1.POST("/returnBook", returnBookHandler)
+	//}
+	//
+	//g2 := router.Group("/")
+	//g2.Use(middleware.AdminAuth())
+	//{
+	//	g2.POST("/updateBookStatus", updateBookStatusHandler)
+	//	g2.POST("/deleteBook", deleteBookHandler)
+	//	g2.POST("/addBook", addBookHandler)
+	//}
+	//router.POST("/login", loginHandler)
+	//router.POST("/admin", adminLoginHandler)
+	router.GET("/register", registerHandler)
+	//router.GET("/getCount", getCountHandler)
+	//router.GET("/getBooks", getBooksHandler)
+	//router.POST("/getBooks", getBooksHandler)
 
 	//router.StaticFile("/favicon.ico", fmt.Sprintf("%v/favicon.ico", staticPath))
 
