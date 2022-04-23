@@ -7,6 +7,7 @@ import (
 	"github.com/smartwalle/alipay/v3"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func SignCheck(context *gin.Context) {
@@ -25,20 +26,39 @@ func SignCheck(context *gin.Context) {
 	client.LoadAliPayRootCertFromFile("alipayRootCert.crt")        // 加载支付宝根证书
 	client.LoadAliPayPublicCertFromFile("alipayCertPublicKey.crt") // 加载支付宝公钥证书
 	client.LoadAliPayPublicKey(alipublic.String())
+
+	var id int
+	id, _ = strconv.Atoi(context.Query("id"))
+
 	req := context.Request
 	req.ParseForm()
+	req.Form.Del("id")
+
 	ok, err := client.VerifySign(req.Form)
 	fmt.Println(ok, err)
 	if !ok {
-		context.JSON(http.StatusOK, gin.H{"SignCheck": false})
+		context.String(http.StatusOK, "%s", "Payment failure")
 	} else {
-		context.JSON(http.StatusOK, gin.H{"SignCheck": true})
+		context.String(http.StatusOK, "%s", "Payment successful\n")
+		tx, _ := agent.DB.Begin()
+		ret2, _ := tx.Exec(fmt.Sprintf("UPDATE borrow set state=3 where id=%v", id))
+		updNums, _ := ret2.RowsAffected()
+
+		if updNums > 0 {
+			_ = tx.Commit()
+			context.String(http.StatusOK, "%s", ":) Successfully returned")
+
+		} else {
+			_ = tx.Rollback()
+
+			context.String(http.StatusOK, "%s", ":( Something bad happened, please contact the librarian")
+		}
 	}
 
 }
 
 // AliPayHandlerMobile 手机网页支付
-// 传参示例http://127.0.0.1/pay/mobile?subject=fine&outtradeno=12340&totalamount=10
+// 传参示例http://127.0.0.1/pay/mobile?id=123211&subject=fine&outtradeno=12340&totalamount=10
 func AliPayHandlerMobile(context *gin.Context) {
 	Cfg, err := ini.Load("app.ini")
 	if err != nil {
@@ -53,10 +73,13 @@ func AliPayHandlerMobile(context *gin.Context) {
 	client.LoadAppPublicCertFromFile("appCertPublicKey.crt")
 	client.LoadAliPayRootCertFromFile("alipayRootCert.crt")        // 加载支付宝根证书
 	client.LoadAliPayPublicCertFromFile("alipayCertPublicKey.crt") // 加载支付宝公钥证书
+
+	id := context.Query("id")
+
 	var p = alipay.TradeWapPay{}
 	p.NotifyURL = "_"
-	p.ReturnURL = "http://127.0.0.1/pay/signcheck"
-	p.QuitURL = "http://127.0.0.1/pay/signcheck"
+	p.ReturnURL = "http://127.0.0.1/pay/signcheck?id=" + string(id)
+	p.QuitURL = "http://127.0.0.1/pay/signcheck?id=" + string(id)
 
 	p.Subject = context.Query("subject")         // 订单标题
 	p.OutTradeNo = context.Query("outtradeno")   // 商户订单号，64个字符以内、可包含字母、数字、下划线；需保证在商户端不重复
@@ -81,11 +104,10 @@ func AliPayHandlerMobile(context *gin.Context) {
 	data := make(map[string]interface{})
 	data["url"] = string(binary)
 	context.JSON(http.StatusOK, data)
-
 }
 
 // AliPayHandlerPC 电脑端网页支付
-// 传参示例http://127.0.0.1/pay/pc?subject=fine&outtradeno=12340&totalamount=10
+// 传参示例http://127.0.0.1/pay/pc?id=12321&subject=fine&outtradeno=12340&totalamount=10
 func AliPayHandlerPC(context *gin.Context) {
 	Cfg, err := ini.Load("app.ini")
 	if err != nil {
@@ -100,9 +122,11 @@ func AliPayHandlerPC(context *gin.Context) {
 	client.LoadAppPublicCertFromFile("appCertPublicKey.crt")
 	client.LoadAliPayRootCertFromFile("alipayRootCert.crt")        // 加载支付宝根证书
 	client.LoadAliPayPublicCertFromFile("alipayCertPublicKey.crt") // 加载支付宝公钥证书
+	id := context.Query("id")
+
 	var p = alipay.TradePagePay{}
 	p.NotifyURL = "_"
-	p.ReturnURL = "http://127.0.0.1/pay/signcheck"
+	p.ReturnURL = "http://127.0.0.1/pay/signcheck?id=" + string(id)
 
 	p.Subject = context.Query("subject")         // 订单标题
 	p.OutTradeNo = context.Query("outtradeno")   // 商户订单号，64个字符以内、可包含字母、数字、下划线；需保证在商户端不重复
