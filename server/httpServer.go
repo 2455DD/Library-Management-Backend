@@ -279,8 +279,6 @@ func startService(port int, path string, staticPath string) {
 	{
 		g1.POST("/getUserBooks", getUserBooksHandler)
 		g1.POST("/getBorrowTime", getBorrowTimeHandler)
-		g1.POST("/reserveBooks", getReserveBooksHandler)
-		g1.POST("/cancelReserveBooks", getCancelReserveBooksHandler)
 		g1.POST("/borrowBook", borrowBookHandler)
 		g1.POST("/returnBook", returnBookHandler)
 	}
@@ -293,6 +291,8 @@ func startService(port int, path string, staticPath string) {
 		g2.POST("/addBook", addBookHandler)
 	}
 
+	router.POST("/reserveBooks", getReserveBooksHandler)
+	router.POST("/cancelReserveBooks", getCancelReserveBooksHandler)
 	router.POST("/login", loginHandler)
 	router.POST("/admin", adminLoginHandler)
 	router.POST("/register", registerHandler)

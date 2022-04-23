@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f809108a-1921-4486-bc49-f57b44597639" name="Default Changelist" comment="现在可能没问题了">
+    <list default="true" id="f809108a-1921-4486-bc49-f57b44597639" name="Default Changelist" comment="现在应该可能没问题了">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/httpServer.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/httpServer.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/services.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/services.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -71,6 +72,14 @@
     </key>
   </component>
   <component name="RunManager" selected="Go 构建.go build lms/server">
+    <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="lms" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="FILE" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
     <configuration name="go build lms/server" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="lms" />
       <working_directory value="$PROJECT_DIR$" />
@@ -128,6 +137,15 @@
       <pattern value="^\QTestGetMetaDataByISBN\E$/^\Qavailable\E$" />
       <method v="2" />
     </configuration>
+    <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
+      <module name="lms" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="DIRECTORY" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Go 构建.go build lms/server" />
       <item itemvalue="Go 测试.TestGetMetaDataByISBN/available in lms/services" />
@@ -174,7 +192,8 @@
     <MESSAGE value="1.ISBN检索器独立为文件&#10;2.ISBN检索器增加中文书籍检索，检索前填写极客API" />
     <MESSAGE value="现在可能有点问题" />
     <MESSAGE value="现在可能没问题了" />
-    <option name="LAST_COMMIT_MESSAGE" value="现在可能没问题了" />
+    <MESSAGE value="现在应该可能没问题了" />
+    <option name="LAST_COMMIT_MESSAGE" value="现在应该可能没问题了" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
