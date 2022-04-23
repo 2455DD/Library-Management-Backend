@@ -3,6 +3,7 @@ package services
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -319,20 +320,23 @@ func (agent DBAgent) ReserveBook(userID int, bookID int) *StatusResult {
 		result.Msg = "预定成功"
 		reserveTime := time.Now()
 		go func() {
-			ticker := time.NewTicker(4 * time.Hour)
+			ticker := time.NewTicker(time.Minute)
 			nowTime := <-ticker.C
+			row := agent.DB.QueryRow(fmt.Sprintf("select book_id from reserve where id=%v", bookID))
+			var id int
+			err := row.Scan(&id)
+			var e = sql.ErrNoRows
+			if err == e {
+				fmt.Println("成功在规定时间内取走或取消预定")
+				return
+			}
 			if nowTime.Sub(reserveTime) >= 4*time.Hour {
-				row := agent.DB.QueryRow(fmt.Sprintf("select book_id from reserve where id=%v", bookID))
-				var id int
-				err := row.Scan(&id)
-				var e = sql.ErrNoRows
-				if err == e {
-					fmt.Println("成功在规定时间内取走或取消预定")
-				} else if err != nil {
-					panic(err)
+				if err != nil {
+					log.Println(err)
 				} else {
 					agent.CancelReserveBook(userID, bookID)
 				}
+				return
 			}
 		}()
 		return result
