@@ -49,48 +49,48 @@ func (agent DBAgent) GetUserBarcodePath(userid int) (string, *StatusResult) {
 
 }
 
-// EscapeForSQL 处理sql语句
-// para: sql-待处理的部分sql语句（条形码存储路径）
+// handleSQL 处理sql语句,参考EscapeForMysql
+// para: path-待处理的部分sql语句（条形码存储路径）
 // return: string-处理过转义字符的sql语句
-func EscapeForSQL(sql string) string {
-	dest := make([]byte, 0, 2*len(sql))
-	var escape byte
-	for i := 0; i < len(sql); i++ {
-		c := sql[i]
+func handleSQL(path string) string {
+	result := make([]byte, 0, 2*len(path))
+	var temp byte
 
-		escape = 0
+	for i := 0; i < len(path); i++ {
+		c := path[i]
+		temp = 0
 
 		switch c {
-		case 0: /* Must be escaped for 'mysql' */
-			escape = '0'
+		case 0:
+			temp = '0'
 			break
-		case '\n': /* Must be escaped for logs */
-			escape = 'n'
+		case '\n':
+			temp = 'n'
 			break
 		case '\r':
-			escape = 'r'
+			temp = 'r'
 			break
 		case '\\':
-			escape = '\\'
+			temp = '\\'
 			break
 		case '\'':
-			escape = '\''
+			temp = '\''
 			break
-		case '"': /* Better safe than sorry */
-			escape = '"'
+		case '"':
+			temp = '"'
 			break
-		case '\032': //十进制26,八进制32,十六进制1a, /* This gives problems on Win32 */
-			escape = 'Z'
+		case '\032':
+			temp = 'Z'
 		}
 
-		if escape != 0 {
-			dest = append(dest, '\\', escape)
+		if temp != 0 {
+			result = append(result, '\\', temp)
 		} else {
-			dest = append(dest, c)
+			result = append(result, c)
 		}
 	}
 
-	return string(dest)
+	return string(result)
 }
 
 // StoreUserBarcodePath 生成（调用GenerateUserBarcode）并存储用户条形码
@@ -113,7 +113,7 @@ func (agent DBAgent) StoreUserBarcodePath(userid int) (string, *StatusResult) {
 		}
 	}
 
-	preparedPath := EscapeForSQL(path)
+	preparedPath := handleSQL(path)
 
 	row := agent.DB.QueryRow(fmt.Sprintf("SELECT EXISTS(SELECT * from user_barcode WHERE id='%v');", userid))
 	var exist int

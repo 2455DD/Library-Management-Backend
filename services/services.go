@@ -57,6 +57,8 @@ const (
 	UserBarcodeOK
 	RenewFailed
 	RenewOK
+	UpdatePasswordOK
+	UpdatePasswordFailed
 )
 
 var (

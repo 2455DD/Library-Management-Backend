@@ -1,7 +1,6 @@
 package services
 
 import (
-	"database/sql"
 	"fmt"
 	"time"
 )
@@ -51,13 +50,8 @@ func (agent DBAgent) RenewBook(borrowID int, userID int, bookID int) *StatusResu
 	if temperr := row.Scan(&exist); temperr == nil && exist != 0 {
 		createTime := time.Now().Format("2006-01-02 15:04:05")
 
-		var tx *sql.Tx
-		tx = new(sql.Tx)
-		tx, _ = agent.DB.Begin()
-		ret2, er := tx.Exec(fmt.Sprintf("UPDATE borrow set createtime='%v', endtime=NULL, state='4' where id='%v'", createTime, borrowID))
-		if er != nil {
-
-		}
+		tx, _ := agent.DB.Begin()
+		ret2, _ := tx.Exec(fmt.Sprintf("UPDATE borrow set createtime='%v', endtime=NULL, state='4' where id='%v'", createTime, borrowID))
 		updNums, _ := ret2.RowsAffected()
 		if updNums > 0 {
 			_ = tx.Commit()
