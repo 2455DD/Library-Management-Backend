@@ -1,6 +1,7 @@
 package services
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 )
@@ -19,6 +20,7 @@ func (agent DBAgent) hasFine(userID int) bool {
 	var creatTime time.Time
 	for row.Next() {
 		err = row.Scan(&creatTime)
+		//ctime, _ := time.Parse("2006-01-02 15:04:05", string(creatTime))
 		currentTime := time.Now()
 		if err != nil {
 			fmt.Println(err.Error())
@@ -48,10 +50,15 @@ func (agent DBAgent) RenewBook(borrowID int, userID int, bookID int) *StatusResu
 	command := fmt.Sprintf("select exists(select * from borrow where id=%v and user_id=%v and book_id=%v);", borrowID, userID, bookID)
 	row := agent.DB.QueryRow(command)
 	if temperr := row.Scan(&exist); temperr == nil && exist != 0 {
-		createTime := time.Now()
+		createTime := time.Now().Format("2006-01-02 15:04:05")
 
-		tx, _ := agent.DB.Begin()
-		ret2, _ := tx.Exec(fmt.Sprintf("UPDATE borrow set createtime=%v where id=%v", createTime, borrowID))
+		var tx *sql.Tx
+		tx = new(sql.Tx)
+		tx, _ = agent.DB.Begin()
+		ret2, er := tx.Exec(fmt.Sprintf("UPDATE borrow set createtime='%v', endtime=NULL, state='4' where id='%v'", createTime, borrowID))
+		if er != nil {
+
+		}
 		updNums, _ := ret2.RowsAffected()
 		if updNums > 0 {
 			_ = tx.Commit()

@@ -66,7 +66,7 @@ var (
 func (agent DBAgent) AuthenticateAdmin(userid string, password string) (*StatusResult, int) {
 	result := &StatusResult{}
 	useridInt, _ := strconv.Atoi(userid)
-	row := agent.DB.QueryRow(fmt.Sprintf("select exists(select * from admin where id='%v', password=MD5('%v'))", useridInt, password))
+	row := agent.DB.QueryRow(fmt.Sprintf("select exists(select * from admin where id='%v' and password=MD5('%v'))", useridInt, password))
 	var exist int
 	if err := row.Scan(&exist); err == nil && exist != 0 {
 		result.Status = AdminLoginOK
@@ -81,7 +81,7 @@ func (agent DBAgent) AuthenticateAdmin(userid string, password string) (*StatusR
 func (agent DBAgent) AuthenticateUser(userid string, password string) (*StatusResult, int) {
 	result := &StatusResult{}
 	useridInt, _ := strconv.Atoi(userid)
-	row := agent.DB.QueryRow(fmt.Sprintf("select exists(select * from admin where id='%v', password=MD5('%v'))", useridInt, password))
+	row := agent.DB.QueryRow(fmt.Sprintf("select exists(select * from user where id='%v' and password=MD5('%v'))", useridInt, password))
 	var exist int
 	if err := row.Scan(&exist); err == nil && exist != 0 {
 		result.Status = AdminLoginOK

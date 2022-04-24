@@ -20,9 +20,9 @@ import (
 var agent DBAgent
 
 func loginHandler(context *gin.Context) {
-	username := context.PostForm("username")
+	userid := context.PostForm("userid")
 	password := context.PostForm("password")
-	loginResult, userID := agent.AuthenticateUser(username, password)
+	loginResult, userID := agent.AuthenticateUser(userid, password)
 	if loginResult.Status == UserLoginOK {
 		token := util.GenToken(userID, util.UserKey)
 		context.JSON(http.StatusOK, gin.H{"status": loginResult.Status, "msg": loginResult.Msg, "token": token})
@@ -196,6 +196,7 @@ func loadConfig(configPath string) {
 
 }
 
+// 用户注册
 func registerWithPasswordHandler(context *gin.Context) {
 	userid := context.PostForm("userid")
 	password := context.PostForm("password")
@@ -208,6 +209,7 @@ func registerWithPasswordHandler(context *gin.Context) {
 	}
 }
 
+// 获取用户二维码
 func getUserBarcodeImageHandler(context *gin.Context) {
 	idString := context.Query("id")
 	id, _ := strconv.Atoi(idString)
@@ -223,6 +225,22 @@ func getUserBarcodeImageHandler(context *gin.Context) {
 			context.Data(http.StatusInternalServerError, "image/png", nil)
 		}
 		context.Data(http.StatusOK, "image/png", data)
+	}
+}
+
+// 续借图书
+func renewBookHandler(context *gin.Context) {
+	iUserID := context.PostForm("userID")
+	bookIDString := context.PostForm("bookID")
+	borrowIDString := context.PostForm("borrowID")
+	userID, _ := strconv.Atoi(iUserID)
+	bookID, _ := strconv.Atoi(bookIDString)
+	borrowID, _ := strconv.Atoi(borrowIDString)
+	result := agent.RenewBook(borrowID, userID, bookID)
+	if result.Status != RenewFailed {
+		context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
+	} else {
+		context.JSON(http.StatusInternalServerError, gin.H{"status": result.Status, "msg": result.Msg})
 	}
 }
 

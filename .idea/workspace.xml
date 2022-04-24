@@ -4,12 +4,14 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f809108a-1921-4486-bc49-f57b44597639" name="Default Changelist" comment="注册返回条形码-5">
+    <list default="true" id="f809108a-1921-4486-bc49-f57b44597639" name="Default Changelist" comment="已完成并测试功能：&#10;1.注册时生成并存储条形码&#10;2.根据用户id返回条形码&#10;3.用户密码加密存储（MD5）&#10;&#10;未测试功能：&#10;1.续借图书">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.ini" beforeDir="false" afterPath="$PROJECT_DIR$/app.ini" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/httpServer.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/httpServer.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/httpServer_test.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/renewBookHandler.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/renew.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/renew.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/services.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/services.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/userBarcode.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/userBarcode.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/services_test.go" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -180,7 +182,8 @@
     <MESSAGE value="续借-1" />
     <MESSAGE value="续借-2" />
     <MESSAGE value="注册返回条形码-5" />
-    <option name="LAST_COMMIT_MESSAGE" value="注册返回条形码-5" />
+    <MESSAGE value="已完成并测试功能：&#10;1.注册时生成并存储条形码&#10;2.根据用户id返回条形码&#10;3.用户密码加密存储（MD5）&#10;&#10;未测试功能：&#10;1.续借图书" />
+    <option name="LAST_COMMIT_MESSAGE" value="已完成并测试功能：&#10;1.注册时生成并存储条形码&#10;2.根据用户id返回条形码&#10;3.用户密码加密存储（MD5）&#10;&#10;未测试功能：&#10;1.续借图书" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
@@ -190,13 +193,8 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/server/httpServer.go</url>
-          <line>213</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/server/httpServer.go</url>
-          <line>202</line>
-          <option name="timeStamp" value="4" />
+          <line>24</line>
+          <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
