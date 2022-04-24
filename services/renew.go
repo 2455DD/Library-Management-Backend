@@ -20,7 +20,6 @@ func (agent DBAgent) hasFine(userID int) bool {
 	var creatTime time.Time
 	for row.Next() {
 		err = row.Scan(&creatTime)
-		//ctime, _ := time.Parse("2006-01-02 15:04:05", string(creatTime))
 		currentTime := time.Now()
 		if err != nil {
 			fmt.Println(err.Error())
