@@ -4,13 +4,8 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f809108a-1921-4486-bc49-f57b44597639" name="Default Changelist" comment="已完成并测试功能：&#10;1.注册时生成并存储条形码&#10;2.根据用户id返回条形码&#10;3.用户密码加密存储（MD5）&#10;4.续借图书">
-      <change afterPath="$PROJECT_DIR$/services/updatePassword.go" afterDir="false" />
+    <list default="true" id="f809108a-1921-4486-bc49-f57b44597639" name="Default Changelist" comment="已完成并测试功能：&#10;1.注册时生成并存储条形码、根据用户id返回条形码&#10;2.用户密码加密存储（因此也修改了用户登录的接口）&#10;3.修改用户密码&#10;4.续借图书">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/httpServer.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/httpServer.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/renew.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/renew.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/services.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/services.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/userBarcode.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/userBarcode.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -184,7 +179,8 @@
     <MESSAGE value="注册返回条形码-5" />
     <MESSAGE value="已完成并测试功能：&#10;1.注册时生成并存储条形码&#10;2.根据用户id返回条形码&#10;3.用户密码加密存储（MD5）&#10;&#10;未测试功能：&#10;1.续借图书" />
     <MESSAGE value="已完成并测试功能：&#10;1.注册时生成并存储条形码&#10;2.根据用户id返回条形码&#10;3.用户密码加密存储（MD5）&#10;4.续借图书" />
-    <option name="LAST_COMMIT_MESSAGE" value="已完成并测试功能：&#10;1.注册时生成并存储条形码&#10;2.根据用户id返回条形码&#10;3.用户密码加密存储（MD5）&#10;4.续借图书" />
+    <MESSAGE value="已完成并测试功能：&#10;1.注册时生成并存储条形码、根据用户id返回条形码&#10;2.用户密码加密存储（因此也修改了用户登录的接口）&#10;3.修改用户密码&#10;4.续借图书" />
+    <option name="LAST_COMMIT_MESSAGE" value="已完成并测试功能：&#10;1.注册时生成并存储条形码、根据用户id返回条形码&#10;2.用户密码加密存储（因此也修改了用户登录的接口）&#10;3.修改用户密码&#10;4.续借图书" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>

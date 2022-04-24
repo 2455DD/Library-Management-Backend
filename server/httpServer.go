@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -41,124 +43,124 @@ func adminLoginHandler(context *gin.Context) {
 	}
 }
 
-//func getCountHandler(context *gin.Context) {
-//	bookCount := agent.GetBookNum()
-//	context.JSON(http.StatusOK, gin.H{"count": bookCount})
-//}
-//
-//func getBooksHandler(context *gin.Context) {
-//	pageString := context.PostForm("page")
-//	page, _ := strconv.Atoi(pageString)
-//	books := agent.GetBooksByPage(page)
-//
-//	bf := bytes.NewBuffer([]byte{})
-//	encoder := json.NewEncoder(bf)
-//	encoder.SetEscapeHTML(false)
-//	_ = encoder.Encode(books)
-//
-//	_, _ = context.Writer.Write(bf.Bytes())
-//}
-//
-//func getBorrowTimeHandler(context *gin.Context) {
-//	bookIDString := context.PostForm("bookID")
-//	bookID, _ := strconv.Atoi(bookIDString)
-//	subTime := agent.GetBorrowTime(bookID)
-//
-//	bf := bytes.NewBuffer([]byte{})
-//	encoder := json.NewEncoder(bf)
-//	encoder.SetEscapeHTML(false)
-//	_ = encoder.Encode(subTime)
-//
-//	_, _ = context.Writer.Write(bf.Bytes())
-//}
-//
-//func getUserBooksHandler(context *gin.Context) {
-//	iUserID, _ := context.Get("userID")
-//	userID := iUserID.(int)
-//	pageString := context.PostForm("page")
-//	page, _ := strconv.Atoi(pageString)
-//	books := agent.GetUserBooksByPage(userID, page)
-//
-//	bf := bytes.NewBuffer([]byte{})
-//	encoder := json.NewEncoder(bf)
-//	encoder.SetEscapeHTML(false)
-//	_ = encoder.Encode(books)
-//
-//	_, _ = context.Writer.Write(bf.Bytes())
-//}
-//
-//func borrowBookHandler(context *gin.Context) {
-//	iUserID, _ := context.Get("userID")
-//	userID := iUserID.(int)
-//	bookIDString := context.PostForm("bookID")
-//	bookID, _ := strconv.Atoi(bookIDString)
-//	result := agent.BorrowBook(userID, bookID)
-//	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
-//}
-//
-//func returnBookHandler(context *gin.Context) {
-//	iUserID, _ := context.Get("userID")
-//	userID := iUserID.(int)
-//	bookIDString := context.PostForm("bookID")
-//	bookID, _ := strconv.Atoi(bookIDString)
-//	result := agent.ReturnBook(userID, bookID)
-//	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
-//}
-//
-//func updateBookStatusHandler(context *gin.Context) {
-//	bookStatusString := context.PostForm("bookStatus")
-//	bookStatusMap := make(map[string]string)
-//	err := json.Unmarshal([]byte(bookStatusString), &bookStatusMap)
-//	if err != nil {
-//		log.Println(err.Error())
-//	}
-//	book := new(Book)
-//	book.Id, _ = strconv.Atoi(bookStatusMap["id"])
-//	book.Name = bookStatusMap["name"]
-//	book.Author = bookStatusMap["author"]
-//	book.Isbn = bookStatusMap["isbn"]
-//	book.Address = bookStatusMap["address"]
-//	book.Language = bookStatusMap["language"]
-//	book.Count, _ = strconv.Atoi(bookStatusMap["count"])
-//	result := agent.UpdateBookStatus(book)
-//	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
-//}
+func getCountHandler(context *gin.Context) {
+	bookCount := agent.GetBookNum()
+	context.JSON(http.StatusOK, gin.H{"count": bookCount})
+}
 
-// /addbook?isbn=&count=&location=
-//func addBookHandler(context *gin.Context) {
-//	isbn := context.PostForm("isbn")
-//	count := context.PostForm("count")
-//	location := context.PostForm("location")
-//	var book Book
-//	var err error
-//	book, err = GetMetaDataByISBN(isbn)
-//	if err != nil {
-//		log.Println("metadata retriever failure: " + err.Error())
-//		book.Name = "Unknown"
-//		book.Author = "Unknown"
-//		book.Language = "Unknown"
-//		book.Isbn = isbn
-//	}
-//	book.Count, _ = strconv.Atoi(count)
-//	book.Location = location
-//	result := agent.AddBook(&book)
-//	if result.Status == UpdateOK {
-//		log.Printf("Add Book %v (ISBN:%v) Successfully \n", book.Name, book.Isbn)
-//	} else {
-//		log.Printf("FAIL TO Add Book %v (ISBN:%v)  \n", book.Name, book.Isbn)
-//	}
-//	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
-//}
+func getBooksHandler(context *gin.Context) {
+	pageString := context.PostForm("page")
+	page, _ := strconv.Atoi(pageString)
+	books := agent.GetBooksByPage(page)
 
-//func deleteBookHandler(context *gin.Context) {
-//	bookID, err := strconv.Atoi(context.PostForm("bookID"))
-//	if err != nil {
-//		fmt.Println(err.Error())
-//		return
-//	}
-//	result := agent.DeleteBook(bookID)
-//	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
-//}
+	bf := bytes.NewBuffer([]byte{})
+	encoder := json.NewEncoder(bf)
+	encoder.SetEscapeHTML(false)
+	_ = encoder.Encode(books)
+
+	_, _ = context.Writer.Write(bf.Bytes())
+}
+
+func getBorrowTimeHandler(context *gin.Context) {
+	bookIDString := context.PostForm("bookID")
+	bookID, _ := strconv.Atoi(bookIDString)
+	subTime := agent.GetBorrowTime(bookID)
+
+	bf := bytes.NewBuffer([]byte{})
+	encoder := json.NewEncoder(bf)
+	encoder.SetEscapeHTML(false)
+	_ = encoder.Encode(subTime)
+
+	_, _ = context.Writer.Write(bf.Bytes())
+}
+
+func getUserBooksHandler(context *gin.Context) {
+	iUserID, _ := context.Get("userID")
+	userID := iUserID.(int)
+	pageString := context.PostForm("page")
+	page, _ := strconv.Atoi(pageString)
+	books := agent.GetUserBooksByPage(userID, page)
+
+	bf := bytes.NewBuffer([]byte{})
+	encoder := json.NewEncoder(bf)
+	encoder.SetEscapeHTML(false)
+	_ = encoder.Encode(books)
+
+	_, _ = context.Writer.Write(bf.Bytes())
+}
+
+func borrowBookHandler(context *gin.Context) {
+	iUserID, _ := context.Get("userID")
+	userID := iUserID.(int)
+	bookIDString := context.PostForm("bookID")
+	bookID, _ := strconv.Atoi(bookIDString)
+	result := agent.BorrowBook(userID, bookID)
+	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
+}
+
+func returnBookHandler(context *gin.Context) {
+	iUserID, _ := context.Get("userID")
+	userID := iUserID.(int)
+	bookIDString := context.PostForm("bookID")
+	bookID, _ := strconv.Atoi(bookIDString)
+	result := agent.ReturnBook(userID, bookID)
+	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
+}
+
+func updateBookStatusHandler(context *gin.Context) {
+	bookStatusString := context.PostForm("bookStatus")
+	bookStatusMap := make(map[string]string)
+	err := json.Unmarshal([]byte(bookStatusString), &bookStatusMap)
+	if err != nil {
+		log.Println(err.Error())
+	}
+	book := new(Book)
+	book.Id, _ = strconv.Atoi(bookStatusMap["id"])
+	book.Name = bookStatusMap["name"]
+	book.Author = bookStatusMap["author"]
+	book.Isbn = bookStatusMap["isbn"]
+	book.Address = bookStatusMap["address"]
+	book.Language = bookStatusMap["language"]
+	book.Count, _ = strconv.Atoi(bookStatusMap["count"])
+	result := agent.UpdateBookStatus(book)
+	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
+}
+
+//addbook?isbn=&count=&location=
+func addBookHandler(context *gin.Context) {
+	isbn := context.PostForm("isbn")
+	count := context.PostForm("count")
+	location := context.PostForm("location")
+	var book Book
+	var err error
+	book, err = GetMetaDataByISBN(isbn)
+	if err != nil {
+		log.Println("metadata retriever failure: " + err.Error())
+		book.Name = "Unknown"
+		book.Author = "Unknown"
+		book.Language = "Unknown"
+		book.Isbn = isbn
+	}
+	book.Count, _ = strconv.Atoi(count)
+	book.Location = location
+	result := agent.AddBook(&book)
+	if result.Status == UpdateOK {
+		log.Printf("Add Book %v (ISBN:%v) Successfully \n", book.Name, book.Isbn)
+	} else {
+		log.Printf("FAIL TO Add Book %v (ISBN:%v)  \n", book.Name, book.Isbn)
+	}
+	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
+}
+
+func deleteBookHandler(context *gin.Context) {
+	bookID, err := strconv.Atoi(context.PostForm("bookID"))
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	result := agent.DeleteBook(bookID)
+	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
+}
 
 func loadConfig(configPath string) {
 	Cfg, err := ini.Load(configPath)
@@ -173,7 +175,7 @@ func loadConfig(configPath string) {
 	httpPort := server.Key("port").MustInt(80)
 	path := server.Key("path").MustString("")
 	staticPath := server.Key("staticPath").MustString("")
-	//Jikeapikey = server.Key("JiKeAPIKey").MustString("")
+	Jikeapikey = server.Key("JiKeAPIKey").MustString("")
 
 	mysql, err := Cfg.GetSection("mysql")
 	if err != nil {
