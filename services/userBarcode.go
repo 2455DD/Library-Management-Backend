@@ -24,9 +24,18 @@ func (agent DBAgent) GetUserBarcodePath(userid int) (string, *StatusResult) {
 	}
 
 	var path string
+	result := &StatusResult{}
 	row := agent.DB.QueryRow(fmt.Sprintf("SELECT barcode_path from user_barcode WHERE id='%v';", userid))
 	err := row.Scan(&path)
+	//若没有二维码，则生成一个
 	if err != nil {
+		path, result = agent.StoreUserBarcodePath(userid)
+		if result.Status != UserBarcodeFailed {
+			return path, &StatusResult{
+				Msg:    "成功获取",
+				Status: UserBarcodeOK,
+			}
+		}
 		return "fail", &StatusResult{
 			Msg:    "用户条形码不存在",
 			Status: UserBarcodeFailed,
@@ -87,10 +96,10 @@ func EscapeForSQL(sql string) string {
 // StoreUserBarcodePath 生成（调用GenerateUserBarcode）并存储用户条形码
 // para: userid-用户ID
 // return: *StatusResult-操作结果
-func (agent DBAgent) StoreUserBarcodePath(userid int) *StatusResult {
+func (agent DBAgent) StoreUserBarcodePath(userid int) (string, *StatusResult) {
 	//检查用户的userid是否在数据库中
 	if !agent.HasUser(userid) {
-		return &StatusResult{
+		return "", &StatusResult{
 			Msg:    "数据库中不存在该用户ID",
 			Status: UserBarcodeFailed,
 		}
@@ -98,7 +107,7 @@ func (agent DBAgent) StoreUserBarcodePath(userid int) *StatusResult {
 
 	path, generateResult := agent.GenerateUserBarcode(userid)
 	if (path == "fail") || (generateResult.Status == UserBarcodeFailed) {
-		return &StatusResult{
+		return "", &StatusResult{
 			Msg:    "生成用户条形码失败",
 			Status: UserBarcodeFailed,
 		}
@@ -110,7 +119,7 @@ func (agent DBAgent) StoreUserBarcodePath(userid int) *StatusResult {
 	var exist int
 	if temperr := row.Scan(&exist); temperr == nil && exist != 0 {
 		if pathh, res := agent.GetUserBarcodePath(userid); res.Status == UserBarcodeOK && pathh == path {
-			return &StatusResult{
+			return path, &StatusResult{
 				Msg:    "数据库中已经存在该用户条形码",
 				Status: UserBarcodeOK,
 			}
@@ -120,18 +129,18 @@ func (agent DBAgent) StoreUserBarcodePath(userid int) *StatusResult {
 			WHERE id='%v';`,
 				preparedPath, userid))
 			if sqlerr != nil {
-				return &StatusResult{
+				return "", &StatusResult{
 					Msg:    "SQL存储失败: " + sqlerr.Error(),
 					Status: UserBarcodeFailed,
 				}
 			}
 			if noOfRow, temperr := result.RowsAffected(); temperr != nil || noOfRow <= 0 {
-				return &StatusResult{
+				return "", &StatusResult{
 					Msg:    "SQL存储失败: " + temperr.Error(),
 					Status: UserBarcodeFailed,
 				}
 			}
-			return &StatusResult{
+			return path, &StatusResult{
 				Msg:    "用户条形码存储成功",
 				Status: UserBarcodeOK,
 			}
@@ -140,18 +149,18 @@ func (agent DBAgent) StoreUserBarcodePath(userid int) *StatusResult {
 	result, sqlerr := agent.DB.Exec(fmt.Sprintf(`INSERT INTO user_barcode(id,barcode_path) 
 			VALUES ('%v','%v')`, userid, preparedPath))
 	if sqlerr != nil {
-		return &StatusResult{
+		return "", &StatusResult{
 			Msg:    "SQL存储失败: " + sqlerr.Error(),
 			Status: UserBarcodeFailed,
 		}
 	}
 	if noOfRow, temperr := result.RowsAffected(); temperr != nil || noOfRow <= 0 {
-		return &StatusResult{
+		return "", &StatusResult{
 			Msg:    "SQL存储失败: " + temperr.Error(),
 			Status: UserBarcodeFailed,
 		}
 	}
-	return &StatusResult{
+	return path, &StatusResult{
 		Msg:    "用户条形码存储成功",
 		Status: UserBarcodeOK,
 	}

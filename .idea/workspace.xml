@@ -4,11 +4,12 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f809108a-1921-4486-bc49-f57b44597639" name="Default Changelist" comment="续借-2">
+    <list default="true" id="f809108a-1921-4486-bc49-f57b44597639" name="Default Changelist" comment="注册返回条形码-5">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.ini" beforeDir="false" afterPath="$PROJECT_DIR$/app.ini" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/httpServer.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/httpServer.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/services.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/services.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/userBarcode.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/userBarcode.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,14 +86,6 @@
     </key>
   </component>
   <component name="RunManager" selected="Go Build.go build lms/server">
-    <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
-      <module name="lms" />
-      <working_directory value="$PROJECT_DIR$" />
-      <kind value="FILE" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <method v="2" />
-    </configuration>
     <configuration name="go build lms/server" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="lms" />
       <working_directory value="$PROJECT_DIR$" />
@@ -150,15 +143,6 @@
       <pattern value="^\QTestGetMetaDataByISBN\E$/^\Qreal_analysis\E$" />
       <method v="2" />
     </configuration>
-    <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
-      <module name="lms" />
-      <working_directory value="$PROJECT_DIR$" />
-      <kind value="DIRECTORY" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <framework value="gotest" />
-      <method v="2" />
-    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Go Build.go build lms/server" />
@@ -195,7 +179,8 @@
     <MESSAGE value="注册时返回条形码-4" />
     <MESSAGE value="续借-1" />
     <MESSAGE value="续借-2" />
-    <option name="LAST_COMMIT_MESSAGE" value="续借-2" />
+    <MESSAGE value="注册返回条形码-5" />
+    <option name="LAST_COMMIT_MESSAGE" value="注册返回条形码-5" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
@@ -205,8 +190,13 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/server/httpServer.go</url>
-          <line>47</line>
-          <option name="timeStamp" value="1" />
+          <line>213</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/server/httpServer.go</url>
+          <line>202</line>
+          <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

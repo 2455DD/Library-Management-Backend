@@ -13,7 +13,6 @@ type DBAgent struct {
 
 type User struct {
 	UserID   int    `db:"id"`
-	Username string `db:"username"`
 	Password string `db:"password"`
 }
 
@@ -64,49 +63,37 @@ var (
 	mediaPath string
 )
 
-func (agent DBAgent) AuthenticateAdmin(username string, password string) (*StatusResult, int) {
+func (agent DBAgent) AuthenticateAdmin(userid string, password string) (*StatusResult, int) {
 	result := &StatusResult{}
-	user := new(User)
-	user.Username = username
-	row := agent.DB.QueryRow(fmt.Sprintf("select * from admin where username='%v'", user.Username))
-	err := row.Scan(&user.UserID, &user.Username, &user.Password)
-	if err != nil {
-		result.Status = UsernameOrPasswordError
-		result.Msg = "不存在此用户"
-		return result, -1
+	useridInt, _ := strconv.Atoi(userid)
+	row := agent.DB.QueryRow(fmt.Sprintf("select exists(select * from admin where id='%v', password=MD5('%v'))", useridInt, password))
+	var exist int
+	if err := row.Scan(&exist); err == nil && exist != 0 {
+		result.Status = AdminLoginOK
+		result.Msg = "用户登录成功"
+		return result, useridInt
 	}
-	if password != user.Password {
-		result.Status = UsernameOrPasswordError
-		result.Msg = "密码错误"
-		return result, -1
-	}
-	result.Status = AdminLoginOK
-	result.Msg = "用户登录成功"
-	return result, user.UserID
+	result.Status = UsernameOrPasswordError
+	result.Msg = "用户登录失败"
+	return result, useridInt
 }
 
-func (agent DBAgent) AuthenticateUser(username string, password string) (*StatusResult, int) {
+func (agent DBAgent) AuthenticateUser(userid string, password string) (*StatusResult, int) {
 	result := &StatusResult{}
-	user := new(User)
-	user.Username = username
-	row := agent.DB.QueryRow(fmt.Sprintf("select * from user where username='%v'", user.Username))
-	err := row.Scan(&user.UserID, &user.Username, &user.Password)
-	if err != nil {
-		result.Status = UsernameOrPasswordError
-		result.Msg = "不存在此用户"
-		return result, -1
+	useridInt, _ := strconv.Atoi(userid)
+	row := agent.DB.QueryRow(fmt.Sprintf("select exists(select * from admin where id='%v', password=MD5('%v'))", useridInt, password))
+	var exist int
+	if err := row.Scan(&exist); err == nil && exist != 0 {
+		result.Status = AdminLoginOK
+		result.Msg = "用户登录成功"
+		return result, useridInt
 	}
-	if password != user.Password {
-		result.Status = UsernameOrPasswordError
-		result.Msg = "密码错误"
-		return result, -1
-	}
-	result.Status = UserLoginOK
-	result.Msg = "用户登录成功"
-	return result, user.UserID
+	result.Status = UsernameOrPasswordError
+	result.Msg = "用户登录失败"
+	return result, useridInt
 }
 
-func (agent DBAgent) RegisterUser(userid string, password string) (*StatusResult, string) {
+func (agent DBAgent) RegisterUserWithPassword(userid string, password string, email string) *StatusResult {
 	result := &StatusResult{}
 
 	useridInt, err := strconv.Atoi(userid)
@@ -114,45 +101,45 @@ func (agent DBAgent) RegisterUser(userid string, password string) (*StatusResult
 		result.Status = RegisterError
 		result.Msg = "注册失败"
 		fmt.Println(err.Error())
-		return result, ""
+		return result
 	}
 
 	if agent.HasUser(useridInt) {
-		result.Status = UsernameExist
+		result.Status = RegisterError
 		result.Msg = "用户ID已经存在"
-		return result, ""
+		return result
 	}
 
-	command := fmt.Sprintf("insert INTO user(id, password) values('%v','%v')", userid, password)
+	command := fmt.Sprintf("insert INTO user(id, password, email) values('%v',MD5('%v'),'%v')", userid, password, email)
 	_, err = agent.DB.Exec(command)
 	if err != nil {
 		result.Status = RegisterError
 		result.Msg = "注册失败"
 		fmt.Println(err.Error())
-		return result, ""
+		return result
 	}
 
-	path, getBarcodeResult := agent.GetUserBarcodePath(useridInt)
-	if (path == "fail") || (getBarcodeResult.Status == UserBarcodeFailed) {
+	path, getBarcodeResult := agent.StoreUserBarcodePath(useridInt)
+	if (path == "") || (getBarcodeResult.Status == UserBarcodeFailed) {
 		return &StatusResult{
-			Msg:    "获取用户条形码存储路径失败",
-			Status: UserBarcodeFailed,
-		}, ""
+			Msg:    "用户条形码存储失败",
+			Status: RegisterError,
+		}
 	}
 
 	result.Status = RegisterOK
 	result.Msg = "注册成功"
 
-	return result, path
+	return result
 }
 
 func (agent DBAgent) HasUser(userid int) bool {
 	user := new(User)
 	row := agent.DB.QueryRow(fmt.Sprintf("select id from user where id='%v'", userid))
-	err := row.Scan(&user.Username)
+	err := row.Scan(&user.UserID)
 	if err != nil {
 		row = agent.DB.QueryRow(fmt.Sprintf("select username from admin where id='%v'", userid))
-		err := row.Scan(&user.Username)
+		err := row.Scan(&user.UserID)
 		if err != nil {
 			return false
 		}

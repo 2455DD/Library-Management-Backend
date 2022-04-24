@@ -13,6 +13,7 @@ import (
 	"lms/util"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 )
 
@@ -40,13 +41,6 @@ func adminLoginHandler(context *gin.Context) {
 	} else {
 		context.JSON(http.StatusOK, gin.H{"status": loginResult.Status, "msg": loginResult.Msg, "token": ""})
 	}
-}
-
-func registerHandler(context *gin.Context) {
-	userid := context.Query("userid")
-	password := context.Query("password")
-	registerResult, file := agent.RegisterUser(userid, password)
-	context.JSON(http.StatusOK, gin.H{"status": registerResult.Status, "msg": registerResult.Msg, "file": file})
 }
 
 func getCountHandler(context *gin.Context) {
@@ -202,17 +196,40 @@ func loadConfig(configPath string) {
 
 }
 
-func testHandler(context *gin.Context) {
-	context.JSON(http.StatusOK, gin.H{
-		"status": "get",
-	})
+func registerWithPasswordHandler(context *gin.Context) {
+	userid := context.PostForm("userid")
+	password := context.PostForm("password")
+	email := context.PostForm("email")
+	registerResult := agent.RegisterUserWithPassword(userid, password, email)
+	if registerResult.Status != RegisterError {
+		context.JSON(http.StatusOK, gin.H{"status": registerResult.Status, "msg": registerResult.Msg})
+	} else {
+		context.JSON(http.StatusInternalServerError, gin.H{"status": registerResult.Status, "msg": registerResult.Msg})
+	}
+}
+
+func getUserBarcodeImageHandler(context *gin.Context) {
+	idString := context.Query("id")
+	id, _ := strconv.Atoi(idString)
+	path, result := agent.GetUserBarcodePath(id)
+	if result.Status == UserBarcodeFailed {
+		log.Println(result.Msg)
+		context.Data(http.StatusInternalServerError, "image/png", nil)
+		return
+	} else {
+		data, err := os.ReadFile(path)
+		if err != nil {
+			log.Println(err.Error())
+			context.Data(http.StatusInternalServerError, "image/png", nil)
+		}
+		context.Data(http.StatusOK, "image/png", data)
+	}
 }
 
 func startService(port int, path string, staticPath string) {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
-	router.GET("/test", testHandler)
 	//router.LoadHTMLFiles(fmt.Sprintf("%v/index.html", path))
 	//router.Use(static.Serve("/static", static.LocalFile(staticPath, true)))
 
@@ -241,7 +258,9 @@ func startService(port int, path string, staticPath string) {
 	//}
 	//router.POST("/login", loginHandler)
 	//router.POST("/admin", adminLoginHandler)
-	router.GET("/register", registerHandler)
+	router.POST("/register", registerWithPasswordHandler)
+	router.GET("/getUserBarcode", getUserBarcodeImageHandler)
+	router.POST("/renew", renewBookHandler)
 	//router.GET("/getCount", getCountHandler)
 	//router.GET("/getBooks", getBooksHandler)
 	//router.POST("/getBooks", getBooksHandler)
