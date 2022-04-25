@@ -6,6 +6,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	. "lms/services"
+	"lms/util"
 	"log"
 	"net/url"
 	"strconv"
@@ -14,22 +15,36 @@ import (
 
 var scheduleDB *gorm.DB
 var interval int
+var reserveHours int
 
 func updatePay() {
-	for {
-		_ = scheduleDB.Transaction(func(tx *gorm.DB) error {
-			pays := make([]Pay, 0)
-			tx.Where("done = ?", 0).Find(&pays)
-			for _, pay := range pays {
-				u := url.Values{"outtradeno": []string{strconv.Itoa(pay.Id)}}
-				if ok, _ := agent.PayClient.VerifySign(u); ok {
-					tx.Model(&pay).Select("done").Updates(&pay)
-				}
+	_ = scheduleDB.Transaction(func(tx *gorm.DB) error {
+		pays := make([]Pay, 0)
+		tx.Where("done = ?", 0).Find(&pays)
+		for _, pay := range pays {
+			u := url.Values{"outtradeno": []string{strconv.Itoa(pay.Id)}}
+			if ok, _ := agent.PayClient.VerifySign(u); ok {
+				tx.Model(&pay).Select("done").Updates(&pay)
 			}
-			return nil
-		})
-		time.Sleep(time.Second * time.Duration(interval))
-	}
+		}
+		return nil
+	})
+}
+
+func updateReserve() {
+	now := time.Now()
+	_ = scheduleDB.Transaction(func(tx *gorm.DB) error {
+		reserves := make([]ReserveBook, 0)
+		tx.Where("end_time is null").Find(&reserves)
+		for _, reserve := range reserves {
+			startTime := util.StringToTime(reserve.StartTime)
+			if int(now.Sub(startTime).Seconds()) > reserveHours * 3600 {
+				reserve.EndTime = util.TimeToString(now)
+				tx.Model(&reserve).Select("end_time").Updates(&reserve)
+			}
+		}
+		return nil
+	})
 }
 
 func initSchedule(cfg *ini.File) {
@@ -53,8 +68,15 @@ func initSchedule(cfg *ini.File) {
 		log.Fatal("Fail to load section 'schedule': ", err)
 	}
 	interval = scheduleCfg.Key("interval").MustInt(5)
+	reserveHours = scheduleCfg.Key("reserveHours").MustInt(4)
 }
 
 func startSchedule() {
-	go updatePay()
+	go func() {
+		for {
+			updatePay()
+			updateReserve()
+			time.Sleep(time.Second * time.Duration(interval))
+		}
+	}()
 }
