@@ -9,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-ini/ini"
 	_ "github.com/go-sql-driver/mysql"
-	"lms/middleware"
 	. "lms/services"
 	"lms/util"
 	"log"
@@ -22,9 +21,9 @@ import (
 var agent DBAgent
 
 func loginHandler(context *gin.Context) {
-	username := context.PostForm("username")
+	userid := context.PostForm("userid")
 	password := context.PostForm("password")
-	loginResult, userID := agent.AuthenticateUser(username, password)
+	loginResult, userID := agent.AuthenticateUser(userid, password)
 	if loginResult.Status == UserLoginOK {
 		token := util.GenToken(userID, util.UserKey)
 		context.JSON(http.StatusOK, gin.H{"status": loginResult.Status, "msg": loginResult.Msg, "token": token})
@@ -43,13 +42,6 @@ func adminLoginHandler(context *gin.Context) {
 	} else {
 		context.JSON(http.StatusOK, gin.H{"status": loginResult.Status, "msg": loginResult.Msg, "token": ""})
 	}
-}
-
-func registerHandler(context *gin.Context) {
-	username := context.PostForm("username")
-	password := context.PostForm("password")
-	registerResult := agent.RegisterUser(username, password)
-	context.JSON(http.StatusOK, gin.H{"status": registerResult.Status, "msg": registerResult.Msg})
 }
 
 func getCountHandler(context *gin.Context) {
@@ -155,7 +147,7 @@ func updateBookStatusHandler(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
 }
 
-// /addbook?isbn=&count=&location=
+//addbook?isbn=&count=&location=
 func addBookHandler(context *gin.Context) {
 	var err error
 	bookStatusString := context.PostForm("bookStatus")
@@ -260,6 +252,67 @@ func loadConfig(configPath string) {
 	}
 	startService(httpPort, path, staticPath)
 
+}
+
+// 用户注册
+func registerWithPasswordHandler(context *gin.Context) {
+	userid := context.PostForm("userid")
+	password := context.PostForm("password")
+	email := context.PostForm("email")
+	registerResult := agent.RegisterUserWithPassword(userid, password, email)
+	if registerResult.Status != RegisterError {
+		context.JSON(http.StatusOK, gin.H{"status": registerResult.Status, "msg": registerResult.Msg})
+	} else {
+		context.JSON(http.StatusInternalServerError, gin.H{"status": registerResult.Status, "msg": registerResult.Msg})
+	}
+}
+
+// 获取用户二维码
+func getUserBarcodeImageHandler(context *gin.Context) {
+	idString := context.Query("id")
+	id, _ := strconv.Atoi(idString)
+	path, result := agent.GetUserBarcodePath(id)
+	if result.Status == UserBarcodeFailed {
+		log.Println(result.Msg)
+		context.Data(http.StatusInternalServerError, "image/png", nil)
+		return
+	} else {
+		data, err := os.ReadFile(path)
+		if err != nil {
+			log.Println(err.Error())
+			context.Data(http.StatusInternalServerError, "image/png", nil)
+		}
+		context.Data(http.StatusOK, "image/png", data)
+	}
+}
+
+// 续借图书
+func renewBookHandler(context *gin.Context) {
+	iUserID := context.PostForm("userID")
+	bookIDString := context.PostForm("bookID")
+	borrowIDString := context.PostForm("borrowID")
+	userID, _ := strconv.Atoi(iUserID)
+	bookID, _ := strconv.Atoi(bookIDString)
+	borrowID, _ := strconv.Atoi(borrowIDString)
+	result := agent.RenewBook(borrowID, userID, bookID)
+	if result.Status != RenewFailed {
+		context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
+	} else {
+		context.JSON(http.StatusInternalServerError, gin.H{"status": result.Status, "msg": result.Msg})
+	}
+}
+
+//修改密码
+func updatePasswordHandler(context *gin.Context) {
+	oldpsw := context.PostForm("oldPassword")
+	newpsw := context.PostForm("newPassword")
+	userid := context.PostForm("userID")
+	result := agent.UpdatePassword(oldpsw, newpsw, userid)
+	if result.Status != UpdatePasswordFailed {
+		context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
+	} else {
+		context.JSON(http.StatusInternalServerError, gin.H{"status": result.Status, "msg": result.Msg})
+	}
 }
 
 func startService(port int, path string, staticPath string) {

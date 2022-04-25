@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="f809108a-1921-4486-bc49-f57b44597639" name="Default Changelist" comment="已完成并测试功能：&#10;1.注册时生成并存储条形码、根据用户id返回条形码&#10;2.用户密码加密存储（因此也修改了用户登录的接口）&#10;3.修改用户密码&#10;4.续借图书">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Go File" />
+      </list>
+    </option>
+  </component>
+  <component name="GOROOT" url="file://C:/Program Files/Go" />
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="HARD" />
+  </component>
+  <component name="GithubProjectSettings">
+    <option name="branchProtectionPatterns">
+      <list>
+        <option value="master" />
+      </list>
+    </option>
+  </component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="selectedUrlAndAccountId">
+      <UrlAndAccount>
+        <option name="accountId" value="5c5e3ffe-8701-4cd6-8f2e-498a9ce66386" />
+        <option name="url" value="git@github.com:2455DD/Library-Management-Backend.git" />
+      </UrlAndAccount>
+    </option>
+  </component>
+  <component name="GoLibraries">
+    <option name="indexEntireGoPath" value="false" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectId" id="21RV2bMkedWLjvLHpRtgEKhgiUQ" />
+  <component name="ProjectLevelVcsManager">
+    <OptionsSetting value="false" id="Update" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="DefaultGoTemplateProperty" value="Go File" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="go.format.on.save.advertiser.fired" value="true" />
+    <property name="go.formatter.settings.were.checked" value="true" />
+    <property name="go.import.settings.migrated" value="true" />
+    <property name="go.modules.go.list.on.any.changes.was.set" value="true" />
+    <property name="go.watchers.conflict.with.on.save.actions.check.performed" value="true" />
+    <property name="last_opened_file_path" value="$USER_HOME$" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="settings.editor.selected.configurable" value="go.vgo" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\WorkSpace\go\lms\util" />
+      <recent name="D:\WorkSpace\go\lms\services" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Go Build.go build lms/server">
+    <configuration name="go build lms/server" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="lms" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="lms/server" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/server/httpServer.go" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestGetMetaDataByISBN in lms/services (1)" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="lms" />
+      <working_directory value="$PROJECT_DIR$/services" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="lms/services" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestGetMetaDataByISBN\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestGetMetaDataByISBN in lms/services (2)" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="lms" />
+      <working_directory value="$PROJECT_DIR$/services" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="lms/services" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestGetMetaDataByISBN\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestGetMetaDataByISBN in lms/services" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="lms" />
+      <working_directory value="$PROJECT_DIR$/services" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="lms/services" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestGetMetaDataByISBN\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestGetMetaDataByISBN/real_analysis in lms/services" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="lms" />
+      <working_directory value="$PROJECT_DIR$/services" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="lms/services" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestGetMetaDataByISBN\E$/^\Qreal_analysis\E$" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Go Build.go build lms/server" />
+        <item itemvalue="Go Test.TestGetMetaDataByISBN in lms/services (2)" />
+        <item itemvalue="Go Test.TestGetMetaDataByISBN/real_analysis in lms/services" />
+        <item itemvalue="Go Test.TestGetMetaDataByISBN in lms/services (1)" />
+        <item itemvalue="Go Test.TestGetMetaDataByISBN in lms/services" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="add ISBN retriever" />
+    <MESSAGE value="1.ISBN检索器独立为文件" />
+    <MESSAGE value="1.ISBN检索器独立为文件&#10;2.ISBN检索器增加中文书籍检索，检索前填写极客API" />
+    <MESSAGE value="注册时返回条形码" />
+    <MESSAGE value="注册时返回条形码-1" />
+    <MESSAGE value="注册时返回条形码-2" />
+    <MESSAGE value="注册时返回条形码-3" />
+    <MESSAGE value="注册时返回条形码-4" />
+    <MESSAGE value="续借-1" />
+    <MESSAGE value="续借-2" />
+    <MESSAGE value="注册返回条形码-5" />
+    <MESSAGE value="已完成并测试功能：&#10;1.注册时生成并存储条形码&#10;2.根据用户id返回条形码&#10;3.用户密码加密存储（MD5）&#10;&#10;未测试功能：&#10;1.续借图书" />
+    <MESSAGE value="已完成并测试功能：&#10;1.注册时生成并存储条形码&#10;2.根据用户id返回条形码&#10;3.用户密码加密存储（MD5）&#10;4.续借图书" />
+    <MESSAGE value="已完成并测试功能：&#10;1.注册时生成并存储条形码、根据用户id返回条形码&#10;2.用户密码加密存储（因此也修改了用户登录的接口）&#10;3.修改用户密码&#10;4.续借图书" />
+    <option name="LAST_COMMIT_MESSAGE" value="已完成并测试功能：&#10;1.注册时生成并存储条形码、根据用户id返回条形码&#10;2.用户密码加密存储（因此也修改了用户登录的接口）&#10;3.修改用户密码&#10;4.续借图书" />
+  </component>
+  <component name="VgoProject">
+    <integration-enabled>true</integration-enabled>
+  </component>
+</project>
