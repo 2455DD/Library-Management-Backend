@@ -1,4 +1,4 @@
-package middleware
+package middlewares
 
 import (
 	"github.com/dgrijalva/jwt-go"
@@ -15,7 +15,7 @@ type Claims struct {
 func UserAuth() gin.HandlerFunc {
 	return func (c *gin.Context) {
 		if userID, ok := auth(c, util.UserKey); ok {
-			c.Set("userID", userID)
+			c.Set("userId", userID)
 			c.Next()
 		} else {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"msg": "Unauthorized"})
@@ -26,7 +26,7 @@ func UserAuth() gin.HandlerFunc {
 func AdminAuth() gin.HandlerFunc {
 	return func (c *gin.Context) {
 		if userID, ok := auth(c, util.AdminKey); ok {
-			c.Set("userID", userID)
+			c.Set("userId", userID)
 			c.Next()
 		} else {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"msg": "Unauthorized"})
@@ -39,4 +39,3 @@ func auth(c *gin.Context, key []byte) (userID int, ok bool) {
 	userID, ok = util.AuthToken(tokenString, key)
 	return
 }
-

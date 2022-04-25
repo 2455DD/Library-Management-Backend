@@ -2,8 +2,9 @@ package services
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	goisbn "github.com/abx123/go-isbn"
+	goISBN "github.com/abx123/go-isbn"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -11,7 +12,7 @@ import (
 )
 
 // 极客API,用于获得中文书籍ISBN信息
-var Jikeapikey string
+var JiKeAPIkey string
 
 type bookRetrieveResult struct {
 	Name        string `json:"name"`        //书名
@@ -23,14 +24,12 @@ type bookRetrieveResult struct {
 	Description string `json:"description"` //图书简介
 	DoubanScore int    `json:"doubanScore"` //豆瓣评分
 }
-type bookRetriveHTTPResult struct {
+
+type bookRetrieveHTTPResult struct {
 	Ret  int                `json:"ret"`
 	Msg  string             `json:"msg"`
 	Data bookRetrieveResult `json:"Data"`
 }
-
-//var plainProxyURL string = "127.0.0.1:6666"
-//var proxyURL, _ = url.Parse(plainProxyURL)
 
 var myClient = &http.Client{
 	Timeout: 10 * time.Second,
@@ -56,21 +55,23 @@ func getJson(url string, target interface{}) error {
 
 func GetMetaDataByISBN(isbn string) (bookInfo Book, err error) {
 	bookInfo = Book{}
-	err = nil
-	isbnRetriever := goisbn.NewGoISBN(goisbn.DEFAULT_PROVIDERS)
-	rawBookInfo, rerr := isbnRetriever.Get(isbn)
-	if rerr != nil {
+	isbnRetriever := goISBN.NewGoISBN(goISBN.DEFAULT_PROVIDERS)
+	rawBookInfo, err := isbnRetriever.Get(isbn)
+	if err != nil {
 		log.Printf("ISBN %v not found in Google Books and Open Library, Checking Jike\n", isbn)
-		var resp bookRetriveHTTPResult
+		var resp bookRetrieveHTTPResult
 		// FIXME: Always Get 403
-		ierr := getJson(fmt.Sprintf("https://api.jike.xyz/situ/book/isbn/%v?apikey=%v", isbn, Jikeapikey), &resp)
-		if ierr != nil {
-			return Book{}, ierr
+		err := getJson(fmt.Sprintf("https://api.jike.xyz/situ/book/isbn/%v?apikey=%v", isbn, JiKeAPIkey), &resp)
+		if err != nil {
+			bookInfo.Isbn = isbn
+			bookInfo.Name = "Unknown"
+			bookInfo.Author = "Unknown"
+			bookInfo.Language = "Unknown"
+			return bookInfo, err
 		}
-		//if resp.Ret != 0 {
-		//	return Book{}, errors.New("book cannot be retrieved, no result")
-		//}
-		bookInfo.Isbn = isbn
+		if resp.Ret != 0 {
+			return bookInfo, errors.New("book cannot be retrieved, no result")
+		}
 		bookInfo.Name = resp.Data.Name
 		bookInfo.Author = resp.Data.Author
 		bookInfo.Language = "Chinese"
