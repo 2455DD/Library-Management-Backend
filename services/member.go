@@ -379,7 +379,9 @@ func (agent *Agent) GetPayMemberFineURL(userId int) (urlStr string) {
 		if !hasOldPay {
 			// 创建新的pay
 			user := User{}
-			tx.First(&user, userId)
+			if err := tx.First(&user, userId).Error; err != nil {
+				return err
+			}
 			pay.UserId = userId
 			pay.Amount = user.Debt
 			if err := tx.Select("user_id", "amount").Create(&pay).Error; err != nil {
@@ -389,6 +391,9 @@ func (agent *Agent) GetPayMemberFineURL(userId int) (urlStr string) {
 		return nil
 	})
 	if err != nil {
+		return
+	}
+	if pay.Amount == 0 {
 		return
 	}
 	var p = alipay.TradePagePay{}

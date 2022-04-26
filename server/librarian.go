@@ -30,7 +30,7 @@ func addBookHandler(context *gin.Context) {
 	if result.Status == AddOK {
 		log.Printf("Add Book %v (ISBN:%v) Successfully \n", book.Name, book.Isbn)
 	} else {
-		log.Printf("FAIL TO Add Book %v (ISBN:%v)  \n", book.Name, book.Isbn)
+		log.Printf("Fail To Add Book %v (ISBN:%v)  \n", book.Name, book.Isbn)
 	}
 	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
 }

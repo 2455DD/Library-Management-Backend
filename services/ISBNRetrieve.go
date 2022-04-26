@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	goISBN "github.com/abx123/go-isbn"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -53,38 +52,23 @@ func getJson(url string, target interface{}) error {
 	return err
 }
 
-func GetMetaDataByISBN(isbn string) (bookInfo Book, err error) {
-	bookInfo = Book{}
-	isbnRetriever := goISBN.NewGoISBN(goISBN.DEFAULT_PROVIDERS)
-	rawBookInfo, err := isbnRetriever.Get(isbn)
+func GetMetaDataByISBN(isbn string) (Book, error) {
+	bookInfo := Book{}
+	var resp bookRetrieveHTTPResult
+	err := getJson(fmt.Sprintf("https://api.jike.xyz/situ/book/isbn/%v?apikey=%v", isbn, JiKeAPIkey), &resp)
 	if err != nil {
-		log.Printf("ISBN %v not found in Google Books and Open Library, Checking Jike\n", isbn)
-		var resp bookRetrieveHTTPResult
-		// FIXME: Always Get 403
-		err := getJson(fmt.Sprintf("https://api.jike.xyz/situ/book/isbn/%v?apikey=%v", isbn, JiKeAPIkey), &resp)
-		if err != nil {
-			bookInfo.Isbn = isbn
-			bookInfo.Name = "Unknown"
-			bookInfo.Author = "Unknown"
-			bookInfo.Language = "Unknown"
-			return bookInfo, err
-		}
-		if resp.Ret != 0 {
-			return bookInfo, errors.New("book cannot be retrieved, no result")
-		}
 		bookInfo.Isbn = isbn
-		bookInfo.Name = resp.Data.Name
-		bookInfo.Author = resp.Data.Author
-		bookInfo.Language = "Chinese"
-	} else {
-		bookInfo.Isbn = isbn
-		var authors string
-		for _, subAuthor := range rawBookInfo.Authors {
-			authors += fmt.Sprintf("%v,", subAuthor)
-		}
-		bookInfo.Author = authors
-		bookInfo.Language = rawBookInfo.Language
-		bookInfo.Name = rawBookInfo.Title
+		bookInfo.Name = "Unknown"
+		bookInfo.Author = "Unknown"
+		bookInfo.Language = "Unknown"
+		return bookInfo, err
 	}
+	if resp.Ret != 0 {
+		return bookInfo, errors.New("book cannot be retrieved, no result")
+	}
+	bookInfo.Isbn = isbn
+	bookInfo.Name = resp.Data.Name
+	bookInfo.Author = resp.Data.Author
+	bookInfo.Language = "Chinese"
 	return bookInfo, nil
 }
