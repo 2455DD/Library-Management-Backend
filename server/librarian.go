@@ -70,11 +70,11 @@ func deleteBookHandler(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
 }
 
-func getAllBorrowBooksPages(context *gin.Context) {
+func getAllBorrowBooksPagesHandler(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"page": agent.GetBorrowBooksPages()})
 }
 
-func getAllBorrowBooks(context *gin.Context) {
+func getAllBorrowBooksHandler(context *gin.Context) {
 	pageStr := context.PostForm("page")
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
@@ -91,11 +91,11 @@ func getAllBorrowBooks(context *gin.Context) {
 	_, _ = context.Writer.Write(bf.Bytes())
 }
 
-func getAllMembersPages(context *gin.Context) {
+func getAllMembersPagesHandler(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"page": agent.GetMemberPages()})
 }
 
-func getAllMembers(context *gin.Context) {
+func getAllMembersHandler(context *gin.Context) {
 	pageStr := context.PostForm("page")
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
@@ -103,6 +103,27 @@ func getAllMembers(context *gin.Context) {
 		return
 	}
 	users := agent.GetMembersByPage(page)
+
+	bf := bytes.NewBuffer([]byte{})
+	encoder := json.NewEncoder(bf)
+	encoder.SetEscapeHTML(false)
+	_ = encoder.Encode(users)
+
+	_, _ = context.Writer.Write(bf.Bytes())
+}
+
+func getMembersHasDebtPagesHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{"page": agent.GetMembersHasDebtPages()})
+}
+
+func getMembersHasDebtHandler(context *gin.Context) {
+	pageStr := context.PostForm("page")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	users := agent.GetMembersHasDebtByPage(page)
 
 	bf := bytes.NewBuffer([]byte{})
 	encoder := json.NewEncoder(bf)

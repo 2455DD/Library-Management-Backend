@@ -10,7 +10,7 @@ import (
 )
 
 type User struct {
-	UserID   int    `db:"id" gorm:"column:id;primaryKey"`
+	UserId   int    `db:"id" gorm:"column:id;primaryKey"`
 	Username string `db:"username" gorm:"column:username"`
 	Password string `db:"password" gorm:"column:password"`
 	Email    string `db:"email" gorm:"column:email"`

@@ -109,10 +109,12 @@ func startService() {
 		g2.POST("/register", registerHandler)
 		g2.POST("/updateBook", updateBookHandler)
 		g2.POST("/deleteBook", deleteBookHandler)
-		g2.POST("/getAllBorrowBooksPages", getAllBorrowBooksPages)
-		g2.POST("/getAllBorrowBooks", getAllBorrowBooks)
-		g2.POST("/getAllMembersPages", getAllMembersPages)
-		g2.POST("/getAllMembers", getAllMembers)
+		g2.POST("/getAllBorrowBooksPages", getAllBorrowBooksPagesHandler)
+		g2.POST("/getAllBorrowBooks", getAllBorrowBooksHandler)
+		g2.POST("/getAllMembersPages", getAllMembersPagesHandler)
+		g2.POST("/getAllMembers", getAllMembersHandler)
+		g2.POST("/getMembersHasDebtPages", getMembersHasDebtPagesHandler)
+		g2.POST("/getMembersHasDebt", getMembersHasDebtHandler)
 	}
 
 	router.POST("/login", loginHandler)

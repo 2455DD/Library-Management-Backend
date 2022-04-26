@@ -17,5 +17,5 @@ func registerHandler(context *gin.Context) {
 		Debt:     0,
 	}
 	registerResult := dbAgent.RegisterMember(&user)
-	context.JSON(http.StatusOK, gin.H{"status": registerResult.Status, "msg": registerResult.Msg, "userId": user.UserID})
+	context.JSON(http.StatusOK, gin.H{"status": registerResult.Status, "msg": registerResult.Msg, "userId": user.UserId})
 }

@@ -5,9 +5,14 @@ import (
 )
 
 type Librarian struct {
-	UserID   int    `db:"id" gorm:"column:id;primaryKey"`
+	UserId   int    `db:"id" gorm:"column:id;primaryKey"`
 	Username string `db:"username" gorm:"column:username"`
 	Password string `db:"password" gorm:"column:password"`
+}
+
+type BorrowData struct {
+	BorrowBookStatus
+	UserId int
 }
 
 type UserData struct {
@@ -116,8 +121,8 @@ func (agent *DBAgent) GetBorrowBooksPages() int64 {
 	return count / 10 + 1
 }
 
-func (agent *DBAgent) GetBorrowBooksByPage(page int) []BorrowBookStatus {
-	statusArr := make([]BorrowBookStatus, 0)
+func (agent *DBAgent) GetBorrowBooksByPage(page int) []BorrowData {
+	borrowDataArr := make([]BorrowData, 0)
 	borrowBooks := make([]BorrowBook, 0)
 	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
 		tx.Offset((page - 1) * 10).Limit(10).Find(&borrowBooks)
@@ -129,12 +134,17 @@ func (agent *DBAgent) GetBorrowBooksByPage(page int) []BorrowBookStatus {
 				status.StartTime = borrowBook.StartTime
 				status.EndTime = borrowBook.EndTime
 				status.Fine = CalculateFine(status)
-				statusArr = append(statusArr, status)
+
+				data := BorrowData{}
+				data.BorrowBookStatus = status
+				data.UserId = borrowBook.UserId
+
+				borrowDataArr = append(borrowDataArr, data)
 			}
 		}
 		return nil
 	})
-	return statusArr
+	return borrowDataArr
 }
 
 func (agent *DBAgent) GetMemberPages() int64 {
@@ -152,7 +162,34 @@ func (agent *DBAgent) GetMembersByPage(page int) []UserData {
 		tx.Offset((page - 1) * 10).Limit(10).Find(&users)
 		for _, user := range users {
 			userData := &UserData{
-				Id:       user.UserID,
+				Id:       user.UserId,
+				Username: user.Username,
+				Email:    user.Email,
+				Debt:     user.Debt,
+			}
+			userArr = append(userArr, *userData)
+		}
+		return nil
+	})
+	return userArr
+}
+
+func (agent *DBAgent) GetMembersHasDebtPages() int64 {
+	var count int64
+	if err := agent.DB.Table("user").Where("debt > 0").Count(&count).Error; err != nil {
+		return 0
+	}
+	return count / 10 + 1
+}
+
+func (agent *DBAgent) GetMembersHasDebtByPage(page int) []UserData {
+	userArr := make([]UserData, 0)
+	users := make([]User, 0)
+	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
+		tx.Where("debt > 0").Offset((page - 1) * 10).Limit(10).Find(&users)
+		for _, user := range users {
+			userData := &UserData{
+				Id:       user.UserId,
 				Username: user.Username,
 				Email:    user.Email,
 				Debt:     user.Debt,
