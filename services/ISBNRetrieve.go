@@ -72,6 +72,7 @@ func GetMetaDataByISBN(isbn string) (bookInfo Book, err error) {
 		if resp.Ret != 0 {
 			return bookInfo, errors.New("book cannot be retrieved, no result")
 		}
+		bookInfo.Isbn = isbn
 		bookInfo.Name = resp.Data.Name
 		bookInfo.Author = resp.Data.Author
 		bookInfo.Language = "Chinese"

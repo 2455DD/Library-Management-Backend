@@ -27,7 +27,7 @@ func addBookHandler(context *gin.Context) {
 	book.Location = location
 
 	result := dbAgent.AddBook(&book, count)
-	if result.Status == UpdateOK {
+	if result.Status == AddOK {
 		log.Printf("Add Book %v (ISBN:%v) Successfully \n", book.Name, book.Isbn)
 	} else {
 		log.Printf("FAIL TO Add Book %v (ISBN:%v)  \n", book.Name, book.Isbn)
