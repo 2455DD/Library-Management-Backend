@@ -198,7 +198,7 @@ func (agent *Agent) BorrowBook(userId int, bookId int) StatusResult {
 	return result
 }
 
-func (agent *DBAgent) ReturnBook(userId int, bookId int) StatusResult {
+func (agent *DBAgent) ReturnBook(bookId int) StatusResult {
 	result := StatusResult{}
 	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
 		borrowBook := BorrowBook{}
@@ -206,12 +206,6 @@ func (agent *DBAgent) ReturnBook(userId int, bookId int) StatusResult {
 			if borrowBook.EndTime != "" {
 				result.Status = ReturnFailed
 				result.Msg = "归还失败，该图书未被借阅"
-				return nil
-			}
-
-			if userId != borrowBook.UserId {
-				result.Status = ReturnFailed
-				result.Msg = "归还失败，该图书不是借给你的"
 				return nil
 			}
 
@@ -412,3 +406,4 @@ func (agent *Agent) GetPayMemberFineURL(userId int) (urlStr string) {
 	urlStr = string(urlBytes)
 	return
 }
+

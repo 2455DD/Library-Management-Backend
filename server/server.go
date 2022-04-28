@@ -94,12 +94,12 @@ func startService() {
 		g1.POST("/getReserveBooksPages", getReserveBooksPagesHandler)
 		g1.POST("/getReserveBooks", getReserveBooksHandler)
 		g1.POST("/borrowBook", borrowBookHandler)
-		g1.POST("/returnBook", returnBookHandler)
 		g1.POST("/reserveBook", reserveBookHandler)
 		g1.POST("/cancelReserveBook", cancelReserveBookHandler)
 		g1.POST("/getMemberHistoryBorrowTime", getMemberHistoryBorrowTimeHandler)
 		g1.POST("/getMemberFine", getMemberFineHandler)
 		g1.POST("/getMemberPayURL", getMemberPayURLHandler)
+		g1.POST("/updatePassword", updatePasswordHandler)
 	}
 
 	g2 := router.Group("/")
@@ -109,6 +109,7 @@ func startService() {
 		g2.POST("/register", registerHandler)
 		g2.POST("/updateBook", updateBookHandler)
 		g2.POST("/deleteBook", deleteBookHandler)
+		g2.POST("/returnBook", returnBookHandler)
 		g2.POST("/getAllBorrowBooksPages", getAllBorrowBooksPagesHandler)
 		g2.POST("/getAllBorrowBooks", getAllBorrowBooksHandler)
 		g2.POST("/getAllMembersPages", getAllMembersPagesHandler)

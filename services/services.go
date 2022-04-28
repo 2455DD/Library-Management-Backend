@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"github.com/smartwalle/alipay/v3"
 	. "gorm.io/gorm"
 )
@@ -45,6 +46,19 @@ type BorrowBook struct {
 	StartTime string	`gorm:"column:start_time"`
 	EndTime   string	`gorm:"column:end_time"`
 }
+
+type BookData struct {
+	Book
+	Status BookStatus
+}
+
+type BookStatus int
+
+const (
+	Idle BookStatus = iota
+	Reserved
+	Borrowed
+)
 
 type ReserveBookStatus struct {
 	Book
@@ -93,6 +107,8 @@ const (
 	UpdateOK
 	DeleteFailed
 	DeleteOK
+	UpdatePasswordFailed
+	UpdatePasswordOK
 )
 
 var (
@@ -123,8 +139,47 @@ func (agent *DBAgent) GetBooksPages() int64 {
 	return count / 10 + 1
 }
 
-func (agent *DBAgent) GetBooksByPage(page int) []Book {
+func (agent *DBAgent) GetBooksByPage(page int) []BookData {
 	books := make([]Book, 0)
+	bookDataArr := make([]BookData, 0)
 	agent.DB.Offset((page - 1) * 10).Limit(10).Find(&books)
-	return books
+	for _, book := range books {
+		bookData := BookData{
+			Book:   book,
+			Status: Idle,
+		}
+		if err := agent.DB.Where("book_id = ? and end_time is null", book.Id).Last(&ReserveBook{}).Error; err == nil {
+			bookData.Status = Reserved
+		}
+		if err := agent.DB.Where("book_id = ? and end_time is null", book.Id).Last(&BorrowBook{}).Error; err == nil {
+			bookData.Status = Borrowed
+		}
+		bookDataArr = append(bookDataArr, bookData)
+	}
+	return bookDataArr
+}
+
+func (agent *DBAgent) UpdatePassword(userId int, oldPassword string, newPassword string) StatusResult {
+	result := StatusResult{}
+	err := agent.DB.Transaction(func(tx *DB) error {
+		user := User{}
+		if err := tx.First(&user, userId).Error; err != nil {
+			return err
+		}
+		if user.Password != oldPassword {
+			return errors.New("密码不正确")
+		}
+		if err := tx.Model(&user).Update("password", newPassword).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		result.Status = UpdatePasswordFailed
+		result.Msg = "修改密码失败"
+		return result
+	}
+	result.Status = UpdateOK
+	result.Msg = "修改密码成功"
+	return result
 }

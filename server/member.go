@@ -61,21 +61,11 @@ func getReserveBooksHandler(context *gin.Context) {
 func borrowBookHandler(context *gin.Context) {
 	iUserID, _ := context.Get("userId")
 	userID := iUserID.(int)
-	bookIDString := context.PostForm("bookID")
+	bookIDString := context.PostForm("bookId")
 	bookID, _ := strconv.Atoi(bookIDString)
 	result := agent.BorrowBook(userID, bookID)
 	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
 }
-
-func returnBookHandler(context *gin.Context) {
-	iUserID, _ := context.Get("userId")
-	userID := iUserID.(int)
-	bookIDString := context.PostForm("bookID")
-	bookID, _ := strconv.Atoi(bookIDString)
-	result := dbAgent.ReturnBook(userID, bookID)
-	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
-}
-
 
 func reserveBookHandler(context *gin.Context) {
 	iUserId, _ := context.Get("userId")
@@ -122,4 +112,17 @@ func getMemberPayURLHandler(context *gin.Context) {
 	userId := iUserId.(int)
 	url := agent.GetPayMemberFineURL(userId)
 	context.JSON(http.StatusOK, gin.H{"url": url})
+}
+
+func updatePasswordHandler(context *gin.Context) {
+	iUserId, _ := context.Get("userId")
+	userId := iUserId.(int)
+	oldPassword, ok1 := context.GetPostForm("oldPassword")
+	newPassword, ok2 := context.GetPostForm("newPassword")
+	if !(ok1 && ok2) {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	result := agent.UpdatePassword(userId, oldPassword, newPassword)
+	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
 }

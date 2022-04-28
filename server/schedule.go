@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/go-ini/ini"
+	"gopkg.in/gomail.v2"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	. "lms/services"
@@ -38,13 +39,34 @@ func updateReserve() {
 		tx.Where("end_time is null").Find(&reserves)
 		for _, reserve := range reserves {
 			startTime := util.StringToTime(reserve.StartTime)
-			if int(now.Sub(startTime).Seconds()) > reserveHours * 3600 {
+			if int(now.Sub(startTime).Seconds()) > 10 {//reserveHours * 3600 {
 				reserve.EndTime = util.TimeToString(now)
 				tx.Model(&reserve).Select("end_time").Updates(&reserve)
+
+				user := User{}
+				tx.First(&user, reserve.UserId)
+				book := Book{}
+				tx.First(&book, reserve.BookId)
+				content := fmt.Sprintf("The book 《%s》 you reserved at %s has been cancelled at %s", book.Name, util.TimeToString(util.StringToTime(reserve.StartTime)), reserve.EndTime)
+				go sendEmail(user.Email, content)
 			}
 		}
 		return nil
 	})
+}
+
+func sendEmail(toEmail string, content string) {
+	m := gomail.NewMessage()
+	m.SetHeader("From", "386401059@qq.com")
+	m.SetHeader("To", toEmail)
+	m.SetHeader("Subject", "Automatic reservation cancellation notice")
+	m.SetBody("text/html", content)
+
+	d := gomail.NewDialer("smtp.qq.com", 465, "386401059@qq.com", "fqiqwnwnjbvhbgbg")
+
+	if err := d.DialAndSend(m); err != nil {
+		log.Println("Send Email Failed, err ", err)
+	}
 }
 
 func initSchedule(cfg *ini.File) {

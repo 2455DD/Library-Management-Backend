@@ -70,6 +70,13 @@ func deleteBookHandler(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
 }
 
+func returnBookHandler(context *gin.Context) {
+	bookIdString := context.PostForm("bookId")
+	bookId, _ := strconv.Atoi(bookIdString)
+	result := dbAgent.ReturnBook(bookId)
+	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
+}
+
 func getAllBorrowBooksPagesHandler(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"page": agent.GetBorrowBooksPages()})
 }
