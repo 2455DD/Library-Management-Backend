@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/go-ini/ini"
 	"io"
-	_ "io/ioutil"
 	"lms/middlewares"
 	. "lms/services"
 	"log"
@@ -79,8 +79,8 @@ func startService() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
-	//router.LoadHTMLFiles(fmt.Sprintf("%v/index.html", path))
-	//router.Use(static.Serve("/static", static.LocalFile(staticPath, true)))
+	router.LoadHTMLFiles(fmt.Sprintf("%v/index.html", path))
+	router.Use(static.Serve("/static", static.LocalFile(staticPath, true)))
 
 	router.GET("/", func(context *gin.Context) {
 		context.HTML(http.StatusOK, "index.html", nil)
@@ -125,7 +125,7 @@ func startService() {
 	router.GET("/getBookBarcode", getBookBarcodeHandler)
 	router.GET("/getMemberBarcode", getMemberBarcodeHandler)
 
-	//router.StaticFile("/favicon.ico", fmt.Sprintf("%v/favicon.ico", staticPath))
+	router.StaticFile("/favicon.ico", fmt.Sprintf("%v/favicon.ico", path))
 
 	err := router.Run(":" + strconv.Itoa(port))
 	if err != nil {
