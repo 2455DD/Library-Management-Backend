@@ -361,7 +361,11 @@ func (agent *Agent) GetPayMemberFineURL(userId int) (urlStr string) {
 	db := agent.DB
 	pay := Pay{}
 
-	agent.GetMemberFine(userId)
+	fine := agent.GetMemberFine(userId)
+
+	if fine == 0 {
+		return
+	}
 
 	hasOldPay := false
 	err := db.Transaction(func(tx *gorm.DB) error {
