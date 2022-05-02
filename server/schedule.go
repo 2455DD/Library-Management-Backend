@@ -19,6 +19,7 @@ var interval int
 var reserveHours int
 
 func updatePay() {
+	userIdArr := make([]int, 0)
 	_ = scheduleDB.Transaction(func(tx *gorm.DB) error {
 		pays := make([]Pay, 0)
 		tx.Where("done = ?", 0).Find(&pays)
@@ -33,10 +34,14 @@ func updatePay() {
 			}
 			if result.Content.TradeStatus == alipay.TradeStatusSuccess {
 				tx.Model(&pay).Select("done").Update("done", 1)
+				userIdArr = append(userIdArr, pay.UserId)
 			}
 		}
 		return nil
 	})
+	for _, userId := range userIdArr {
+		agent.GetMemberFine(userId)
+	}
 }
 
 func updateReserve() {
