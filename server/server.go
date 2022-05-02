@@ -125,7 +125,7 @@ func startService() {
 	router.GET("/getBookBarcode", getBookBarcodeHandler)
 	router.GET("/getMemberBarcode", getMemberBarcodeHandler)
 
-	router.GET("/alipayNotify", alipayNotifyHandler)
+	router.POST("/alipayNotify", alipayNotifyHandler)
 
 	router.StaticFile("/favicon.ico", fmt.Sprintf("%v/favicon.ico", path))
 
