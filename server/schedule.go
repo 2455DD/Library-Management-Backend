@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 	"github.com/go-ini/ini"
+	"github.com/smartwalle/alipay/v3"
 	"gopkg.in/gomail.v2"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	. "lms/services"
 	"lms/util"
 	"log"
-	"net/url"
 	"strconv"
 	"time"
 )
@@ -23,9 +23,16 @@ func updatePay() {
 		pays := make([]Pay, 0)
 		tx.Where("done = ?", 0).Find(&pays)
 		for _, pay := range pays {
-			u := url.Values{"outtradeno": []string{strconv.Itoa(pay.Id)}}
-			if ok, _ := agent.PayClient.VerifySign(u); ok {
-				tx.Model(&pay).Select("done").Updates(&pay)
+			query := alipay.TradeQuery{
+				OutTradeNo:   strconv.Itoa(pay.Id),
+				QueryOptions: nil,
+			}
+			result, err := agent.PayClient.TradeQuery(query)
+			if err != nil {
+				continue
+			}
+			if result.Content.TradeStatus == alipay.TradeStatusSuccess {
+				tx.Model(&pay).Select("done").Update("done", 1)
 			}
 		}
 		return nil
@@ -96,6 +103,7 @@ func initSchedule(cfg *ini.File) {
 func startSchedule() {
 	go func() {
 		for {
+			updatePay()
 			updateReserve()
 			time.Sleep(time.Second * time.Duration(interval))
 		}

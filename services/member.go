@@ -396,7 +396,7 @@ func (agent *Agent) GetPayMemberFineURL(userId int) (urlStr string) {
 	p.OutTradeNo = strconv.Itoa(pay.Id)
 	p.TotalAmount = strconv.Itoa(pay.Amount)
 	p.ProductCode = "FAST_INSTANT_TRADE_PAY"
-	p.NotifyURL = "http://121.5.46.215/alipayNotify"
+	// p.NotifyURL = "http://121.5.46.215/alipayNotify"
 	u, err := payClient.TradePagePay(p)
 	if err != nil {
 		log.Println(err)
