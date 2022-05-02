@@ -96,7 +96,6 @@ func initSchedule(cfg *ini.File) {
 func startSchedule() {
 	go func() {
 		for {
-			updatePay()
 			updateReserve()
 			time.Sleep(time.Second * time.Duration(interval))
 		}

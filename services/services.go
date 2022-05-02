@@ -179,7 +179,7 @@ func (agent *DBAgent) UpdatePassword(userId int, oldPassword string, newPassword
 		result.Msg = "修改密码失败"
 		return result
 	}
-	result.Status = UpdateOK
+	result.Status = UpdatePasswordOK
 	result.Msg = "修改密码成功"
 	return result
 }

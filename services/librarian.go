@@ -155,12 +155,13 @@ func (agent *DBAgent) GetMemberPages() int64 {
 	return count / 10 + 1
 }
 
-func (agent *DBAgent) GetMembersByPage(page int) []UserData {
+func (agent *Agent) GetMembersByPage(page int) []UserData {
 	userArr := make([]UserData, 0)
 	users := make([]User, 0)
 	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
 		tx.Offset((page - 1) * 10).Limit(10).Find(&users)
 		for _, user := range users {
+			agent.GetMemberFine(user.UserId)
 			userData := &UserData{
 				Id:       user.UserId,
 				Username: user.Username,
@@ -182,12 +183,13 @@ func (agent *DBAgent) GetMembersHasDebtPages() int64 {
 	return count / 10 + 1
 }
 
-func (agent *DBAgent) GetMembersHasDebtByPage(page int) []UserData {
+func (agent *Agent) GetMembersHasDebtByPage(page int) []UserData {
 	userArr := make([]UserData, 0)
 	users := make([]User, 0)
 	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
 		tx.Where("debt > 0").Offset((page - 1) * 10).Limit(10).Find(&users)
 		for _, user := range users {
+			agent.GetMemberFine(user.UserId)
 			userData := &UserData{
 				Id:       user.UserId,
 				Username: user.Username,
