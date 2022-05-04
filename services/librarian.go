@@ -2,6 +2,8 @@ package services
 
 import (
 	"gorm.io/gorm"
+	"lms/util"
+	"time"
 )
 
 type Librarian struct {
@@ -63,24 +65,20 @@ func (agent *DBAgent) RegisterMember(user *User) StatusResult {
 	return result
 }
 
-func (agent *DBAgent) AddBook(book *Book, count int) StatusResult {
-	result := StatusResult{}
-	err := agent.DB.Transaction(func(tx *gorm.DB) error {
+func (agent *DBAgent) AddBook(book *Book, count int) []int {
+	bookIdArr := make([]int, 0)
+	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
 		for i := 0; i < count; i++ {
-			if err := tx.Omit("id").Create(book).Error; err != nil {
+			res := tx.Omit("id").Create(book)
+			if err := res.Error; err != nil {
 				return err
 			}
+			bookIdArr = append(bookIdArr, book.Id)
+			book.Id = 0
 		}
 		return nil
 	})
-	if err != nil {
-		result.Status = AddFailed
-		result.Msg = "添加图书失败"
-	} else {
-		result.Status = AddOK
-		result.Msg = "添加图书成功"
-	}
-	return result
+	return bookIdArr
 }
 
 func (agent *DBAgent) UpdateBook(book *Book) StatusResult {
@@ -101,6 +99,22 @@ func (agent *DBAgent) UpdateBook(book *Book) StatusResult {
 func (agent *DBAgent) DeleteBook(bookId int) StatusResult {
 	result := StatusResult{}
 	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
+		borrowBook := BorrowBook{}
+		if err := tx.Where("book_id = ?", bookId).Last(&borrowBook).Error; err == nil {
+			if borrowBook.EndTime == "" {
+				result.Status = DeleteFailed
+				result.Msg = "删除图书失败"
+				return nil
+			}
+		}
+		reserveBook := ReserveBook{}
+		if err := tx.Where("book_id = ?", bookId).Last(&reserveBook).Error; err == nil {
+			if reserveBook.EndTime == "" {
+				result.Status = DeleteFailed
+				result.Msg = "删除图书失败"
+				return nil
+			}
+		}
 		if err := tx.Delete(&Book{}, bookId).Error; err != nil {
 			result.Status = DeleteFailed
 			result.Msg = "删除图书失败"
@@ -133,6 +147,8 @@ func (agent *DBAgent) GetBorrowBooksByPage(page int) []BorrowData {
 				status.Book = book
 				status.StartTime = borrowBook.StartTime
 				status.EndTime = borrowBook.EndTime
+				deadline := util.StringToTime(borrowBook.StartTime).Add(time.Hour * 240)
+				status.Deadline = deadline.Format(util.GormTimeFormat)
 				status.Fine = CalculateFine(status)
 
 				data := BorrowData{}

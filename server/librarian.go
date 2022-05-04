@@ -20,19 +20,22 @@ func addBookHandler(context *gin.Context) {
 	}
 
 	book, err := GetMetaDataByISBN(isbn)
-	if err != nil {
-		context.JSON(http.StatusOK, gin.H{"status": AddFailed, "msg": "查询不到ISBN"})
-		return
+	bookIdArr := make([]int, 0)
+	if err == nil {
+		book.Location = location
+		bookIdArr = dbAgent.AddBook(&book, count)
+		if len(bookIdArr) > 0 {
+			log.Printf("Add Book %v (ISBN:%v) Successfully \n", book.Name, book.Isbn)
+		} else {
+			log.Printf("Fail To Add Book %v (ISBN:%v)  \n", book.Name, book.Isbn)
+		}
 	}
-	book.Location = location
+	bf := bytes.NewBuffer([]byte{})
+	encoder := json.NewEncoder(bf)
+	encoder.SetEscapeHTML(false)
+	_ = encoder.Encode(bookIdArr)
 
-	result := dbAgent.AddBook(&book, count)
-	if result.Status == AddOK {
-		log.Printf("Add Book %v (ISBN:%v) Successfully \n", book.Name, book.Isbn)
-	} else {
-		log.Printf("Fail To Add Book %v (ISBN:%v)  \n", book.Name, book.Isbn)
-	}
-	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
+	_, _ = context.Writer.Write(bf.Bytes())
 }
 
 func updateBookHandler(context *gin.Context) {

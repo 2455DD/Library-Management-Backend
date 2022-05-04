@@ -83,6 +83,8 @@ func (agent *DBAgent) GetMemberBorrowBooks(userId int, page int) []BorrowBookSta
 			status.Book = book
 			status.StartTime = borrowBook.StartTime
 			status.EndTime = borrowBook.EndTime
+			deadline := util.StringToTime(borrowBook.StartTime).Add(time.Hour * 240)
+			status.Deadline = deadline.Format(util.GormTimeFormat)
 			status.Fine = CalculateFine(status)
 			statusArr = append(statusArr, status)
 		}
@@ -109,6 +111,10 @@ func (agent *DBAgent) GetMemberReserveBooks(userId int, page int) []ReserveBookS
 			status.Book = book
 			status.StartTime = reserveBook.StartTime
 			status.EndTime = reserveBook.EndTime
+			if reserveBook.EndTime == "" {
+				canceledTime := util.StringToTime(reserveBook.StartTime).Add(time.Hour * time.Duration(ReserveHours))
+				status.CanceledTime = canceledTime.Format(util.GormTimeFormat)
+			}
 			statusArr = append(statusArr, status)
 		}
 	}

@@ -62,15 +62,17 @@ const (
 
 type ReserveBookStatus struct {
 	Book
-	StartTime string
-	EndTime   string
+	StartTime    string
+	EndTime      string
+	CanceledTime string
 }
 
 type BorrowBookStatus struct {
 	Book
-	StartTime string
-	EndTime   string
-	Fine      int
+	StartTime  string
+	EndTime    string
+	Deadline   string
+	Fine       int
 }
 
 type Pay struct {

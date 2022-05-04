@@ -1,11 +1,8 @@
 package main
 
 import (
-	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/go-ini/ini"
 	"github.com/smartwalle/alipay/v3"
-	"gorm.io/gorm"
 	. "lms/services"
 	"log"
 )
@@ -26,18 +23,4 @@ func initPayClient(cfg *ini.File) {
 	_ = client.LoadAliPayPublicKey(aliPublic.String())
 
 	payAgent.PayClient = client
-}
-
-func alipayNotifyHandler(context *gin.Context) {
-	var notify, _ = payAgent.PayClient.GetTradeNotification(context.Request)
-	if notify != nil {
-		fmt.Println("交易状态为:", notify.TradeStatus)
-		if notify.TradeStatus == alipay.TradeStatusSuccess {
-			_ = scheduleDB.Transaction(func(tx *gorm.DB) error {
-				tx.Model(&Pay{}).Where("id = ?", notify.OutTradeNo).Update("done", 1)
-				return nil
-			})
-		}
-	}
-	alipay.AckNotification(context.Writer)
 }
