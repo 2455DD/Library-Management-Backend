@@ -87,7 +87,7 @@ func startService() {
 	})
 
 	g1 := router.Group("/")
-	g1.Use(middlewares.UserAuth())
+	g1.Use(middlewares.MemberAuth())
 	{
 		g1.POST("/getBorrowBooksPages", getBorrowBooksPagesHandler)
 		g1.POST("/getBorrowBooks", getBorrowBooksHandler)

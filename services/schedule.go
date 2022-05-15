@@ -48,7 +48,7 @@ func (agent *Agent) UpdateReserve() {
 		tx.Where("end_time is null").Find(&reserves)
 		for _, reserve := range reserves {
 			startTime := util.StringToTime(reserve.StartTime)
-			if int(now.Sub(startTime).Seconds()) > ReserveHours* 3600 {
+			if int(now.Sub(startTime).Seconds()) > ReserveHours*3600 {
 				reserve.EndTime = util.TimeToString(now)
 				tx.Model(&reserve).Select("end_time").Updates(&reserve)
 

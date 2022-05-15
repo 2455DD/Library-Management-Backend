@@ -132,7 +132,7 @@ func (agent *DBAgent) GetBorrowBooksPages() int64 {
 	if err := agent.DB.Table("borrow").Count(&count).Error; err != nil {
 		return 0
 	}
-	return count / 10 + 1
+	return count/10 + 1
 }
 
 func (agent *DBAgent) GetBorrowBooksByPage(page int) []BorrowData {
@@ -168,7 +168,7 @@ func (agent *DBAgent) GetMemberPages() int64 {
 	if err := agent.DB.Table("user").Count(&count).Error; err != nil {
 		return 0
 	}
-	return count / 10 + 1
+	return count/10 + 1
 }
 
 func (agent *Agent) GetMembersByPage(page int) []UserData {
@@ -196,7 +196,7 @@ func (agent *DBAgent) GetMembersHasDebtPages() int64 {
 	if err := agent.DB.Table("user").Where("debt > 0").Count(&count).Error; err != nil {
 		return 0
 	}
-	return count / 10 + 1
+	return count/10 + 1
 }
 
 func (agent *Agent) GetMembersHasDebtByPage(page int) []UserData {
