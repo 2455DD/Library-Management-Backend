@@ -163,6 +163,35 @@ func (agent *DBAgent) GetBorrowBooksByPage(page int) []BorrowData {
 	return borrowDataArr
 }
 
+func (agent *DBAgent) GetCertainMemberBorrowBooksByPage(page int, userID int) []BorrowData {
+	borrowDataArr := make([]BorrowData, 0)
+	borrowBooks := make([]BorrowBook, 0)
+	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
+		tx.Offset((page-1)*10).Limit(10).
+			Where("user_id = ?", userID).Find(&borrowBooks)
+		for _, borrowBook := range borrowBooks {
+			book := Book{}
+			if err := tx.First(&book, borrowBook.BookId).Error; err == nil {
+				status := BorrowBookStatus{}
+				status.Book = book
+				status.StartTime = borrowBook.StartTime
+				status.EndTime = borrowBook.EndTime
+				deadline := util.StringToTime(borrowBook.StartTime).Add(time.Hour * 240)
+				status.Deadline = deadline.Format(util.GormTimeFormat)
+				status.Fine = CalculateFine(status)
+
+				data := BorrowData{}
+				data.BorrowBookStatus = status
+				data.UserId = borrowBook.UserId
+
+				borrowDataArr = append(borrowDataArr, data)
+			}
+		}
+		return nil
+	})
+	return borrowDataArr
+}
+
 func (agent *DBAgent) GetMemberPages() int64 {
 	var count int64
 	if err := agent.DB.Table("user").Count(&count).Error; err != nil {

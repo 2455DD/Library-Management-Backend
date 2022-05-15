@@ -93,7 +93,6 @@ func startService() {
 		g1.POST("/getBorrowBooks", getBorrowBooksHandler)
 		g1.POST("/getReserveBooksPages", getReserveBooksPagesHandler)
 		g1.POST("/getReserveBooks", getReserveBooksHandler)
-		g1.POST("/borrowBook", borrowBookHandler)
 		g1.POST("/reserveBook", reserveBookHandler)
 		g1.POST("/cancelReserveBook", cancelReserveBookHandler)
 		g1.POST("/getMemberHistoryBorrowTime", getMemberHistoryBorrowTimeHandler)
@@ -103,8 +102,11 @@ func startService() {
 	}
 
 	g2 := router.Group("/")
+	// Librarian Domain, Used After Auth
 	g2.Use(middlewares.AdminAuth())
 	{
+		g2.POST("/getMemberBorrowHistoryByPage", getBorrowBooksByMemberIDHandler)
+		g2.POST("/borrowBook", borrowBookHandler)
 		g2.POST("/addBook", addBookHandler)
 		g2.POST("/register", registerHandler)
 		g2.POST("/updateBook", updateBookHandler)

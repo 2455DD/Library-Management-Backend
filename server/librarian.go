@@ -101,6 +101,29 @@ func getAllBorrowBooksHandler(context *gin.Context) {
 	_, _ = context.Writer.Write(bf.Bytes())
 }
 
+func getBorrowBooksByMemberIDHandler(context *gin.Context) {
+	pageStr := context.PostForm("page")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	userIDStr := context.PostForm("userid")
+	userid, userErr := strconv.Atoi(userIDStr)
+	if userErr != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	books := agent.GetCertainMemberBorrowBooksByPage(page, userid)
+
+	bf := bytes.NewBuffer([]byte{})
+	encoder := json.NewEncoder(bf)
+	encoder.SetEscapeHTML(false)
+	_ = encoder.Encode(books)
+
+	_, _ = context.Writer.Write(bf.Bytes())
+}
+
 func getAllMembersPagesHandler(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"page": agent.GetMemberPages()})
 }
