@@ -123,7 +123,7 @@ func (agent *DBAgent) GetMemberReserveBooks(userId int, page int) []ReserveBookS
 
 func (agent *Agent) BorrowBook(userId int, bookId int) StatusResult {
 	result := StatusResult{}
-	agent.GetMemberFine(userId)
+	GetMemberFine(agent.DB, userId)
 	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
 		// 判断bookId
 		if err := tx.First(&Book{}, bookId).Error; err != nil {
@@ -336,11 +336,11 @@ func (agent *DBAgent) GetMemberHistoryBorrowTime(userId int) int {
 	return days
 }
 
-func (agent *Agent) GetMemberFine(userId int) int {
+func GetMemberFine(db *gorm.DB, userId int) int {
 	user := User{}
 	borrowBooks := make([]BorrowBook, 0)
 	pays := make([]Pay, 0)
-	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
+	_ = db.Transaction(func(tx *gorm.DB) error {
 		fine := 0
 		paid := 0
 		tx.First(&user, userId)
@@ -367,7 +367,7 @@ func (agent *Agent) GetPayMemberFineURL(userId int) (urlStr string) {
 	db := agent.DB
 	pay := Pay{}
 
-	fine := agent.GetMemberFine(userId)
+	fine := GetMemberFine(agent.DB, userId)
 
 	if fine == 0 {
 		return

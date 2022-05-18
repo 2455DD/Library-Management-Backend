@@ -142,3 +142,14 @@ func getMembersHasDebtHandler(context *gin.Context) {
 
 	_, _ = context.Writer.Write(bf.Bytes())
 }
+
+func deleteMemberHandler(context *gin.Context) {
+	userIdStr := context.PostForm("userId")
+	userId, err := strconv.Atoi(userIdStr)
+	if err != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	result := agent.DeleteMember(userId)
+	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
+}

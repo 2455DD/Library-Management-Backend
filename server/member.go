@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
+	. "lms/services"
 	"net/http"
 	"strconv"
 )
@@ -103,7 +104,7 @@ func getMemberHistoryBorrowTimeHandler(context *gin.Context) {
 func getMemberFineHandler(context *gin.Context) {
 	iUserId, _ := context.Get("userId")
 	userId := iUserId.(int)
-	fine := agent.GetMemberFine(userId)
+	fine := GetMemberFine(agent.DB, userId)
 	context.JSON(http.StatusOK, gin.H{"fine": fine})
 }
 

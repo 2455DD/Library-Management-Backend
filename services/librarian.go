@@ -177,7 +177,7 @@ func (agent *Agent) GetMembersByPage(page int) []UserData {
 	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
 		tx.Offset((page - 1) * 10).Limit(10).Find(&users)
 		for _, user := range users {
-			agent.GetMemberFine(user.UserId)
+			GetMemberFine(tx, user.UserId)
 			userData := &UserData{
 				Id:       user.UserId,
 				Username: user.Username,
@@ -205,7 +205,7 @@ func (agent *Agent) GetMembersHasDebtByPage(page int) []UserData {
 	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
 		tx.Where("debt > 0").Offset((page - 1) * 10).Limit(10).Find(&users)
 		for _, user := range users {
-			agent.GetMemberFine(user.UserId)
+			GetMemberFine(tx, user.UserId)
 			userData := &UserData{
 				Id:       user.UserId,
 				Username: user.Username,
@@ -217,4 +217,39 @@ func (agent *Agent) GetMembersHasDebtByPage(page int) []UserData {
 		return nil
 	})
 	return userArr
+}
+
+func (agent *Agent) DeleteMember(userId int) StatusResult {
+	result := StatusResult{}
+	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
+		borrows := make([]BorrowBook, 0)
+		reserves := make([]ReserveBook, 0)
+		ok := true
+		if err := tx.Table("borrow").Where("user_id = ? and end_time is null", userId).Find(&borrows).Error; err != nil {
+			ok = false
+		}
+		if err := tx.Table("reserve").Where("user_id = ? and end_time is null", userId).Find(&reserves).Error; err != nil {
+			ok = false
+		}
+		user := &User{}
+		GetMemberFine(tx, userId)
+		if err := tx.First(&user, userId).Error; err != nil || user.Debt > 0 {
+			ok = false
+		}
+		if !ok || len(borrows) > 0 || len(reserves) > 0 {
+			result.Status = DeleteUserFailed
+			result.Msg = "删除用户失败"
+			return nil
+		}
+		if err := tx.Delete(&User{}, userId).Error; err != nil {
+			result.Status = DeleteUserFailed
+			result.Msg = "删除用户失败"
+			return nil
+		} else {
+			result.Status = DeleteUserOK
+			result.Msg = "删除用户成功"
+		}
+		return nil
+	})
+	return result
 }
