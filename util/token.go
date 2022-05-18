@@ -21,7 +21,7 @@ func GenToken(userID int, key []byte) string {
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expireTime.Unix(), //过期时间
 			IssuedAt:  time.Now().Unix(),
-			Issuer:    "127.0.0.1",  // 签名颁发者
+			Issuer:    "127.0.0.1",     // 签名颁发者
 			Subject:   "library token", //签名主题
 		},
 	}

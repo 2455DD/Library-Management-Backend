@@ -32,19 +32,19 @@ type Book struct {
 }
 
 type ReserveBook struct {
-	Id		  int		`gorm:"column:id;primaryKey"`
-	BookId    int		`gorm:"column:book_id"`
-	UserId    int		`gorm:"column:user_id"`
-	StartTime string	`gorm:"column:start_time"`
-	EndTime   string	`gorm:"column:end_time"`
+	Id        int    `gorm:"column:id;primaryKey"`
+	BookId    int    `gorm:"column:book_id"`
+	UserId    int    `gorm:"column:user_id"`
+	StartTime string `gorm:"column:start_time"`
+	EndTime   string `gorm:"column:end_time"`
 }
 
 type BorrowBook struct {
-	Id		  int		`gorm:"column:id;primaryKey"`
-	BookId    int		`gorm:"column:book_id"`
-	UserId    int		`gorm:"column:user_id"`
-	StartTime string	`gorm:"column:start_time"`
-	EndTime   string	`gorm:"column:end_time"`
+	Id        int    `gorm:"column:id;primaryKey"`
+	BookId    int    `gorm:"column:book_id"`
+	UserId    int    `gorm:"column:user_id"`
+	StartTime string `gorm:"column:start_time"`
+	EndTime   string `gorm:"column:end_time"`
 }
 
 type BookData struct {
@@ -69,17 +69,17 @@ type ReserveBookStatus struct {
 
 type BorrowBookStatus struct {
 	Book
-	StartTime  string
-	EndTime    string
-	Deadline   string
-	Fine       int
+	StartTime string
+	EndTime   string
+	Deadline  string
+	Fine      int
 }
 
 type Pay struct {
-	Id       int	`gorm:"column:id;primaryKey"`
-	UserId   int    `gorm:"column:user_id"`
-	Amount   int	`gorm:"column:amount"`
-	Done     int    `gorm:"column:done"`
+	Id     int `gorm:"column:id;primaryKey"`
+	UserId int `gorm:"column:user_id"`
+	Amount int `gorm:"column:amount"`
+	Done   int `gorm:"column:done"`
 }
 
 type StatusResult struct {
@@ -131,7 +131,7 @@ func (borrowBook *BorrowBook) TableName() string {
 	return "borrow"
 }
 
-func (pay *Pay) TableName() string{
+func (pay *Pay) TableName() string {
 	return "pay"
 }
 
@@ -140,7 +140,7 @@ func (agent *DBAgent) GetBooksPages() int64 {
 	if err := agent.DB.Table("book").Count(&count).Error; err != nil {
 		return 0
 	}
-	return count / 10 + 1
+	return count/10 + 1
 }
 
 func (agent *DBAgent) GetBooksByPage(page int) []BookData {

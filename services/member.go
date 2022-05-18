@@ -48,7 +48,7 @@ func (agent *DBAgent) GetMemberBorrowBooksPages(userId int) int64 {
 	if err := agent.DB.Table("borrow").Where("user_id = ?", userId).Count(&count).Error; err != nil {
 		return 0
 	}
-	return count / 10 + 1
+	return count/10 + 1
 }
 
 func CalculateDayDiff(startTime time.Time, endTime time.Time) int {
@@ -97,7 +97,7 @@ func (agent *DBAgent) GetMemberReserveBooksPages(userId int) int64 {
 	if err := agent.DB.Table("reserve").Where("user_id = ?", userId).Count(&count).Error; err != nil {
 		return 0
 	}
-	return count / 10 + 1
+	return count/10 + 1
 }
 
 func (agent *DBAgent) GetMemberReserveBooks(userId int, page int) []ReserveBookStatus {
@@ -265,8 +265,8 @@ func (agent *DBAgent) ReserveBook(userId int, bookId int) StatusResult {
 		}
 
 		newReserveBook := &ReserveBook{
-			BookId: bookId,
-			UserId: userId,
+			BookId:    bookId,
+			UserId:    userId,
 			StartTime: util.TimeToString(time.Now()),
 		}
 		if err := tx.Select("book_id", "user_id", "start_time").Create(&newReserveBook).Error; err != nil {
@@ -419,4 +419,3 @@ func (agent *Agent) GetPayMemberFineURL(userId int) (urlStr string) {
 	urlStr = string(urlBytes)
 	return
 }
-

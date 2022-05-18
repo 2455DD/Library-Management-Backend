@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	TimeFormat = "2006-01-02 15:04:05"
+	TimeFormat     = "2006-01-02 15:04:05"
 	GormTimeFormat = "2006-01-02T15:04:05Z"
 )
 
