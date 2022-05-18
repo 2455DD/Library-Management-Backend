@@ -12,17 +12,18 @@ import (
 
 func addBookHandler(context *gin.Context) {
 	isbn := context.PostForm("isbn")
-	location := context.PostForm("location")
-	count, err := strconv.Atoi(context.PostForm("count"))
-	if err != nil {
+	locationId, err1 := strconv.Atoi(context.PostForm("locationId"))
+	categoryId, err2 := strconv.Atoi(context.PostForm("categoryId"))
+	count, err3 := strconv.Atoi(context.PostForm("count"))
+	if err1 != nil || err2 != nil || err3 != nil {
 		context.Status(http.StatusBadRequest)
 		return
 	}
-
 	book, err := GetMetaDataByISBN(isbn)
 	bookIdArr := make([]int, 0)
 	if err == nil {
-		book.Location = location
+		book.LocationId = locationId
+		book.CategoryId = categoryId
 		bookIdArr = dbAgent.AddBook(&book, count)
 		if len(bookIdArr) > 0 {
 			log.Printf("Add Book %v (ISBN:%v) Successfully \n", book.Name, book.Isbn)
@@ -47,17 +48,21 @@ func updateBookHandler(context *gin.Context) {
 	isbn := context.PostForm("isbn")
 	name := context.PostForm("name")
 	author := context.PostForm("author")
-	address := context.PostForm("address")
 	language := context.PostForm("language")
-	location := context.PostForm("location")
+	locationId, err1 := strconv.Atoi(context.PostForm("locationId"))
+	categoryId, err2 := strconv.Atoi(context.PostForm("categoryId"))
+	if err1 != nil || err2 != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
 	book := Book{
 		Id:       bookId,
 		Name:     name,
 		Author:   author,
 		Isbn:     isbn,
-		Address:  address,
 		Language: language,
-		Location: location,
+		LocationId: locationId,
+		CategoryId: categoryId,
 	}
 	result := agent.UpdateBook(&book)
 	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
@@ -151,5 +156,25 @@ func deleteMemberHandler(context *gin.Context) {
 		return
 	}
 	result := agent.DeleteMember(userId)
+	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
+}
+
+func addCategoryHandler(context *gin.Context) {
+	categoryName, ok := context.GetPostForm("category")
+	if !ok {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	result := agent.AddCategory(categoryName)
+	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
+}
+
+func addLocationHandler(context *gin.Context) {
+	locationName, ok := context.GetPostForm("location")
+	if !ok {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	result := agent.AddLocation(locationName)
 	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
 }

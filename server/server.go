@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/go-ini/ini"
 	"io"
@@ -25,6 +24,26 @@ func getBooksPagesHandler(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"page": dbAgent.GetBooksPages()})
 }
 
+func getBooksPagesByCategoryHandler(context *gin.Context) {
+	categoryIdStr := context.Query("categoryId")
+	categoryId, err := strconv.Atoi(categoryIdStr)
+	if err != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{"page": dbAgent.GetBooksPagesByCategory(categoryId)})
+}
+
+func getBooksPagesByLocationHandler(context *gin.Context) {
+	locationIdStr := context.Query("locationId")
+	locationId, err := strconv.Atoi(locationIdStr)
+	if err != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{"page": dbAgent.GetBooksPagesByLocation(locationId)})
+}
+
 func getBooksHandler(context *gin.Context) {
 	pageString := context.Query("page")
 	page, err := strconv.Atoi(pageString)
@@ -37,6 +56,70 @@ func getBooksHandler(context *gin.Context) {
 	encoder := json.NewEncoder(bf)
 	encoder.SetEscapeHTML(false)
 	_ = encoder.Encode(books)
+
+	_, _ = context.Writer.Write(bf.Bytes())
+}
+
+func getBooksByCategoryHandler(context *gin.Context) {
+	pageString := context.Query("page")
+	page, err := strconv.Atoi(pageString)
+	if err != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	categoryIdStr := context.Query("categoryId")
+	categoryId, err := strconv.Atoi(categoryIdStr)
+	if err != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	books := dbAgent.GetBooksByCategory(page, categoryId)
+	bf := bytes.NewBuffer([]byte{})
+	encoder := json.NewEncoder(bf)
+	encoder.SetEscapeHTML(false)
+	_ = encoder.Encode(books)
+
+	_, _ = context.Writer.Write(bf.Bytes())
+}
+
+func getBooksByLocationHandler(context *gin.Context) {
+	pageString := context.Query("page")
+	page, err := strconv.Atoi(pageString)
+	if err != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	locationIdStr := context.Query("locationId")
+	locationId, err := strconv.Atoi(locationIdStr)
+	if err != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	books := dbAgent.GetBooksByCategory(page, locationId)
+	bf := bytes.NewBuffer([]byte{})
+	encoder := json.NewEncoder(bf)
+	encoder.SetEscapeHTML(false)
+	_ = encoder.Encode(books)
+
+	_, _ = context.Writer.Write(bf.Bytes())
+}
+
+func getCategoriesHandler(context *gin.Context) {
+	categories := dbAgent.GetCategories()
+	bf := bytes.NewBuffer([]byte{})
+	encoder := json.NewEncoder(bf)
+	encoder.SetEscapeHTML(false)
+	_ = encoder.Encode(categories)
+
+	_, _ = context.Writer.Write(bf.Bytes())
+}
+
+func getLocationsHandler(context *gin.Context) {
+	locations := dbAgent.GetLocations()
+	bf := bytes.NewBuffer([]byte{})
+	encoder := json.NewEncoder(bf)
+	encoder.SetEscapeHTML(false)
+	_ = encoder.Encode(locations)
 
 	_, _ = context.Writer.Write(bf.Bytes())
 }
@@ -79,12 +162,12 @@ func startService() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
-	router.LoadHTMLFiles(fmt.Sprintf("%v/index.html", path))
+/*	router.LoadHTMLFiles(fmt.Sprintf("%v/index.html", path))
 	router.Use(static.Serve("/static", static.LocalFile(staticPath, true)))
 
 	router.GET("/", func(context *gin.Context) {
 		context.HTML(http.StatusOK, "index.html", nil)
-	})
+	})*/
 
 	g1 := router.Group("/")
 	g1.Use(middlewares.MemberAuth())
@@ -117,16 +200,24 @@ func startService() {
 		g2.POST("/getMembersHasDebtPages", getMembersHasDebtPagesHandler)
 		g2.POST("/getMembersHasDebt", getMembersHasDebtHandler)
 		g2.POST("/deleteMember", deleteMemberHandler)
+		g2.POST("/addCategory", addCategoryHandler)
+		g2.POST("/addLocation", addLocationHandler)
 	}
 
 	router.POST("/login", loginHandler)
 	router.POST("/admin", adminLoginHandler)
 	router.GET("/getBooksPages", getBooksPagesHandler)
 	router.GET("/getBooks", getBooksHandler)
+	router.GET("/getCategories", getCategoriesHandler)
+	router.GET("/getLocations", getLocationsHandler)
+	router.GET("/getBooksPagesByCategory", getBooksPagesByCategoryHandler)
+	router.GET("/getBooksByCategory", getBooksByCategoryHandler)
+	router.GET("/getBooksPagesByLocation", getBooksPagesByLocationHandler)
+	router.GET("/getBooksByLocation", getBooksByLocationHandler)
 	router.GET("/getBookBarcode", getBookBarcodeHandler)
 	router.GET("/getMemberBarcode", getMemberBarcodeHandler)
 
-	router.StaticFile("/favicon.ico", fmt.Sprintf("%v/favicon.ico", path))
+	//router.StaticFile("/favicon.ico", fmt.Sprintf("%v/favicon.ico", path))
 
 	err := router.Run(":" + strconv.Itoa(port))
 	if err != nil {

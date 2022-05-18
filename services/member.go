@@ -80,7 +80,7 @@ func (agent *DBAgent) GetMemberBorrowBooks(userId int, page int) []BorrowBookSta
 		book := Book{}
 		if err := agent.DB.First(&book, borrowBook.BookId).Error; err == nil {
 			status := BorrowBookStatus{}
-			status.Book = book
+			status.BookMetaData = agent.getBookData(&book)
 			status.StartTime = borrowBook.StartTime
 			status.EndTime = borrowBook.EndTime
 			deadline := util.StringToTime(borrowBook.StartTime).Add(time.Hour * 240)
@@ -108,7 +108,7 @@ func (agent *DBAgent) GetMemberReserveBooks(userId int, page int) []ReserveBookS
 		book := Book{}
 		if err := agent.DB.First(&book, reserveBook.BookId).Error; err == nil {
 			status := ReserveBookStatus{}
-			status.Book = book
+			status.BookMetaData = agent.getBookData(&book)
 			status.StartTime = reserveBook.StartTime
 			status.EndTime = reserveBook.EndTime
 			if reserveBook.EndTime == "" {

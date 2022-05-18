@@ -144,7 +144,7 @@ func (agent *DBAgent) GetBorrowBooksByPage(page int) []BorrowData {
 			book := Book{}
 			if err := tx.First(&book, borrowBook.BookId).Error; err == nil {
 				status := BorrowBookStatus{}
-				status.Book = book
+				status.BookMetaData = agent.getBookData(&book)
 				status.StartTime = borrowBook.StartTime
 				status.EndTime = borrowBook.EndTime
 				deadline := util.StringToTime(borrowBook.StartTime).Add(time.Hour * 240)
@@ -251,5 +251,45 @@ func (agent *Agent) DeleteMember(userId int) StatusResult {
 		}
 		return nil
 	})
+	return result
+}
+
+func (agent *Agent) AddCategory(name string) StatusResult {
+	result := StatusResult{}
+	err := agent.DB.Transaction(func(tx *gorm.DB) error {
+		category := Category{}
+		category.Name = name
+		if err := tx.Select("name").Create(&category).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		result.Status = AddCategoryFailed
+		result.Msg = "添加Category失败"
+	} else {
+		result.Status = AddCategoryOK
+		result.Msg = "添加Category成功"
+	}
+	return result
+}
+
+func (agent *Agent) AddLocation(name string) StatusResult {
+	result := StatusResult{}
+	err := agent.DB.Transaction(func(tx *gorm.DB) error {
+		location := Location{}
+		location.Name = name
+		if err := tx.Select("name").Create(&location).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		result.Status = AddLocationFailed
+		result.Msg = "添加Location失败"
+	} else {
+		result.Status = AddLocationOK
+		result.Msg = "添加Location成功"
+	}
 	return result
 }
