@@ -23,7 +23,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f809108a-1921-4486-bc49-f57b44597639" name="Default Changelist" comment="现在可能没问题了">
-      <change beforePath="$PROJECT_DIR$/server/schedule.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/schedule.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/register.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/register.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/server.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,7 +40,7 @@
       </list>
     </option>
   </component>
-  <component name="GOROOT" path="C:\Go" />
+  <component name="GOROOT" path="D:\Go" />
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
@@ -144,9 +147,9 @@
     </configuration>
     <list>
       <item itemvalue="Go Build.go build lms/server" />
-      <item itemvalue="Go Test.TestGetMetaDataByISBN in lms/services" />
       <item itemvalue="Go Test.TestGetMetaDataByISBN in lms/services (1)" />
       <item itemvalue="Go Test.TestGetMetaDataByISBN in lms/services (2)" />
+      <item itemvalue="Go Test.TestGetMetaDataByISBN in lms/services" />
       <item itemvalue="Go Test.TestGetMetaDataByISBN/available in lms/services" />
     </list>
     <recent_temporary>
@@ -196,6 +199,10 @@
     </environment>
   </component>
   <component name="WindowStateProjectService">
+    <state x="702" y="435" key="#GOROOT" timestamp="1652958235965">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="702" y="435" key="#GOROOT/0.0.1920.1040@0.0.1920.1040" timestamp="1652958235965" />
     <state width="1493" height="213" key="GridCell.Tab.0.bottom" timestamp="1651155777447">
       <screen x="0" y="0" width="1536" height="834" />
     </state>
