@@ -105,7 +105,7 @@ func startService() {
 	// Librarian Domain, Used After Auth
 	g2.Use(middlewares.AdminAuth())
 	{
-		g2.POST("/getMemberBorrowHistoryByPage", getBorrowBooksByMemberIDHandler)
+		g2.GET("/getMemberBorrowHistoryByPage", getBorrowBooksByMemberIDHandler)
 		g2.POST("/borrowBook", borrowBookHandler)
 		g2.POST("/addBook", addBookHandler)
 		g2.POST("/register", registerHandler)

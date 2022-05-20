@@ -101,6 +101,7 @@ func getAllBorrowBooksHandler(context *gin.Context) {
 	_, _ = context.Writer.Write(bf.Bytes())
 }
 
+// FIXME:UNTESTED
 func getBorrowBooksByMemberIDHandler(context *gin.Context) {
 	pageStr := context.PostForm("page")
 	page, err := strconv.Atoi(pageStr)
@@ -114,7 +115,7 @@ func getBorrowBooksByMemberIDHandler(context *gin.Context) {
 		context.Status(http.StatusBadRequest)
 		return
 	}
-	books := agent.GetCertainMemberBorrowBooksByPage(page, userid)
+	books := agent.GetMemberOverdueHistoryByPage(page, userid)
 
 	bf := bytes.NewBuffer([]byte{})
 	encoder := json.NewEncoder(bf)
