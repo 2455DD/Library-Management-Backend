@@ -8,7 +8,7 @@ import (
 
 func registerHandler(context *gin.Context) {
 	username := context.PostForm("username")
-	password := context.PostForm("password")
+	password := "1234"
 	email := context.PostForm("email")
 	user := User{
 		Username: username,
