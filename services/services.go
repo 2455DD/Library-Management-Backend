@@ -111,6 +111,8 @@ const (
 	DeleteOK
 	UpdatePasswordFailed
 	UpdatePasswordOK
+	SearchFailed
+	SearchOK
 )
 
 var (
