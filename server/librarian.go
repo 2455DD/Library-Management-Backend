@@ -69,13 +69,14 @@ func updateBookHandler(context *gin.Context) {
 }
 
 func deleteBookHandler(context *gin.Context) {
-	bookId, err := strconv.Atoi(context.PostForm("bookId"))
-	if err != nil {
+	bookId, err1 := strconv.Atoi(context.PostForm("bookId"))
+	state, err2 := strconv.Atoi(context.PostForm("state"))
+	if err1 != nil || err2 != nil {
 		context.Status(http.StatusBadRequest)
 		return
 	}
-	result := agent.DeleteBook(bookId)
-	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
+	result := agent.DeleteBook(bookId, BookState(state))
+	context.JSON(http.StatusOK, gin.H{"state": result.Status, "msg": result.Msg})
 }
 
 func returnBookHandler(context *gin.Context) {
@@ -177,4 +178,40 @@ func addLocationHandler(context *gin.Context) {
 	}
 	result := agent.AddLocation(locationName)
 	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
+}
+
+func getMemberCountHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{"count": agent.GetMemberCount()})
+}
+
+func getBookCountByISBNHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{"count": agent.GetBookCountByISBN()})
+}
+
+func getBookCountByCopyHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{"count": agent.GetBookCountByCopy()})
+}
+
+func getCurrentBorrowCountHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{"count": agent.GetCurrentBorrowCount()})
+}
+
+func getHistoryBorrowCountHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{"count": agent.GetHistoryBorrowCount()})
+}
+
+func getDamagedBookCountHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{"count": agent.GetDamagedBookCount()})
+}
+
+func getLostBookCountHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{"count": agent.GetLostBookCount()})
+}
+
+func getUnpaidFineHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{"count": agent.GetUnpaidFine()})
+}
+
+func getPaidFineHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{"count": agent.GetPaidFine()})
 }

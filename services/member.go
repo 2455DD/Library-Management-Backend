@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"github.com/smartwalle/alipay/v3"
 	"gorm.io/gorm"
 	"lms/util"
@@ -11,11 +12,12 @@ import (
 )
 
 type User struct {
-	UserId   int    `db:"id" gorm:"column:id;primaryKey"`
-	Username string `db:"username" gorm:"column:username"`
-	Password string `db:"password" gorm:"column:password"`
-	Email    string `db:"email" gorm:"column:email"`
-	Debt     int    `db:"debt" gorm:"column:debt"`
+	UserId   int         `gorm:"column:id;primaryKey"`
+	Username string      `gorm:"column:username"`
+	Password string      `gorm:"column:password"`
+	Email    string      `gorm:"column:email"`
+	Debt     int         `gorm:"column:debt"`
+	State    MemberState `gorm:"column:state"`
 }
 
 func (user User) TableName() string {
@@ -28,7 +30,7 @@ func (agent *DBAgent) AuthenticateUser(userId int, password string) StatusResult
 	result := StatusResult{}
 	user := &User{}
 	tx := agent.DB.First(&user, userId)
-	if tx.Error != nil {
+	if tx.Error != nil || user.State == Unavailable {
 		result.Status = LoginIdNotExist
 		result.Msg = "不存在此用户"
 		return result
@@ -48,7 +50,7 @@ func (agent *DBAgent) GetMemberBorrowBooksPages(userId int) int64 {
 	if err := agent.DB.Table("borrow").Where("user_id = ?", userId).Count(&count).Error; err != nil {
 		return 0
 	}
-	return count/10 + 1
+	return (count - 1) / itemsPerPage + 1
 }
 
 func CalculateDayDiff(startTime time.Time, endTime time.Time) int {
@@ -75,7 +77,7 @@ func CalculateFine(status BorrowBookStatus) int {
 func (agent *DBAgent) GetMemberBorrowBooks(userId int, page int) []BorrowBookStatus {
 	borrowBooks := make([]BorrowBook, 0)
 	statusArr := make([]BorrowBookStatus, 0)
-	agent.DB.Where("user_id = ?", userId).Find(&borrowBooks).Offset((page - 1) * 10).Limit(10)
+	agent.DB.Where("user_id = ?", userId).Find(&borrowBooks).Offset((page - 1) * itemsPerPage).Limit(itemsPerPage)
 	for _, borrowBook := range borrowBooks {
 		book := Book{}
 		if err := agent.DB.First(&book, borrowBook.BookId).Error; err == nil {
@@ -97,13 +99,13 @@ func (agent *DBAgent) GetMemberReserveBooksPages(userId int) int64 {
 	if err := agent.DB.Table("reserve").Where("user_id = ?", userId).Count(&count).Error; err != nil {
 		return 0
 	}
-	return count/10 + 1
+	return (count - 1) / itemsPerPage + 1
 }
 
 func (agent *DBAgent) GetMemberReserveBooks(userId int, page int) []ReserveBookStatus {
 	reserveBooks := make([]ReserveBook, 0)
 	statusArr := make([]ReserveBookStatus, 0)
-	agent.DB.Where("user_id = ?", userId).Find(&reserveBooks).Offset((page - 1) * 10).Limit(10)
+	agent.DB.Where("user_id = ?", userId).Find(&reserveBooks).Offset((page - 1) * itemsPerPage).Limit(itemsPerPage)
 	for _, reserveBook := range reserveBooks {
 		book := Book{}
 		if err := agent.DB.First(&book, reserveBook.BookId).Error; err == nil {
@@ -124,12 +126,20 @@ func (agent *DBAgent) GetMemberReserveBooks(userId int, page int) []ReserveBookS
 func (agent *Agent) BorrowBook(userId int, bookId int) StatusResult {
 	result := StatusResult{}
 	GetMemberFine(agent.DB, userId)
-	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
-		// 判断bookId
-		if err := tx.First(&Book{}, bookId).Error; err != nil {
-			result.Status = BorrowFailed
-			result.Msg = "借阅失败"
+	err := agent.DB.Transaction(func(tx *gorm.DB) error {
+		// 判断图书状态
+		book := Book{}
+		if err := tx.First(&book, bookId).Error; err != nil {
 			return err
+		}
+		if book.State == Damaged {
+			return errors.New("图书损毁")
+		}
+		if book.State == Lost {
+			return errors.New("图书遗失")
+		}
+		if book.State == Borrowed {
+			return errors.New("借阅失败，该图书已经被借出")
 		}
 
 		// 判断是否有罚金未缴纳
@@ -138,130 +148,112 @@ func (agent *Agent) BorrowBook(userId int, bookId int) StatusResult {
 			return err
 		}
 		if user.Debt != 0 {
-			result.Status = BorrowFailed
-			result.Msg = "请先缴纳罚金"
-			return nil
+			return errors.New("请先缴纳罚金")
 		}
 
 		// 判断是否借阅达到了五本书
 		var count int64
 		tx.Model(&BorrowBook{}).Where("user_id = ? and end_time is null", userId).Count(&count)
 		if count >= 5 {
-			result.Status = BorrowFailed
-			result.Msg = "达到借阅上限"
-			return nil
+			return errors.New("达到借阅上限")
 		}
 
 		// 判断该书是否被预约
-		reserveBook := ReserveBook{}
-		if err := tx.Where("book_id = ?", bookId).Last(&reserveBook).Error; err == nil {
-			// 判断是否被预约
-			if reserveBook.EndTime == "" {
-				// 是否被其他人预约
-				if reserveBook.UserId != userId {
-					result.Status = BorrowFailed
-					result.Msg = "借阅失败，该图书已经被预约"
-					return nil
-				} else {
-					reserveBook.EndTime = util.TimeToString(time.Now())
-					if err := tx.Model(&reserveBook).Select("end_time").Updates(&reserveBook).Error; err != nil {
-						result.Status = BorrowFailed
-						result.Msg = "借阅失败"
-						return err
-					}
-					result.Status = BorrowOK
-					result.Msg = "借阅成功"
+		if book.State == Reserved {
+			reserveBook := ReserveBook{}
+			if err := tx.Where("book_id = ?", bookId).Last(&reserveBook).Error; err != nil {
+				return err
+			}
+			// 是否被其他人预约
+			if reserveBook.UserId != userId {
+				return errors.New("借阅失败，该图书已经被预约")
+			} else {
+				reserveBook.EndTime = util.TimeToString(time.Now())
+				if err := tx.Model(&reserveBook).Select("end_time").Updates(&reserveBook).Error; err != nil {
+					return err
 				}
 			}
 		}
 
-		// 再判断该书是否已经被借过
-		borrowBook := BorrowBook{}
-		if err := tx.Where("book_id = ?", bookId).Last(&borrowBook).Error; err == nil {
-			if borrowBook.EndTime == "" {
-				result.Status = BorrowFailed
-				result.Msg = "借阅失败，该图书已经被借出"
-				return nil
-			}
-		}
-
+		// 借阅
 		newBorrowBook := BorrowBook{
 			BookId:    bookId,
 			UserId:    userId,
 			StartTime: util.TimeToString(time.Now()),
 		}
-
-		// 借阅
 		if err := tx.Select("book_id", "user_id", "start_time").Create(&newBorrowBook).Error; err != nil {
-			result.Status = BorrowFailed
-			result.Msg = "借阅失败"
+			return err
+		}
+		book.State = Borrowed
+		if err := tx.Model(&book).Select("state").Updates(&book).Error; err != nil {
 			return err
 		}
 
-		result.Status = BorrowOK
-		result.Msg = "借阅成功"
 		return nil
 	})
+	if err != nil {
+		result.Status = BorrowFailed
+		result.Msg = err.Error()
+	} else {
+		result.Status = BorrowOK
+		result.Msg = "借阅成功"
+	}
 	return result
 }
 
 func (agent *DBAgent) ReturnBook(bookId int) StatusResult {
 	result := StatusResult{}
-	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
-		borrowBook := BorrowBook{}
-		if err := tx.Where("book_id = ?", bookId).Last(&borrowBook).Error; err == nil {
-			if borrowBook.EndTime != "" {
-				result.Status = ReturnFailed
-				result.Msg = "归还失败，该图书未被借阅"
-				return nil
-			}
-
-			borrowBook.EndTime = util.TimeToString(time.Now())
-			if err := tx.Model(&borrowBook).Select("end_time").Updates(&borrowBook).Error; err != nil {
-				result.Status = ReturnFailed
-				result.Msg = "归还失败"
-				return err
-			}
-
-			result.Status = ReturnOK
-			result.Msg = "归还成功"
-			return nil
+	err := agent.DB.Transaction(func(tx *gorm.DB) error {
+		book := Book{}
+		if err := tx.First(&book, bookId).Error; err != nil {
+			return err
 		}
-		result.Status = ReturnFailed
-		result.Msg = "归还失败，该图书未被借阅"
+		if book.State != Borrowed {
+			return errors.New("图书未被借阅")
+		}
+		borrowBook := BorrowBook{}
+		if err := tx.Where("book_id = ?", bookId).Last(&borrowBook).Error; err != nil {
+			return err
+		}
+		borrowBook.EndTime = util.TimeToString(time.Now())
+		if err := tx.Model(&borrowBook).Select("end_time").Updates(&borrowBook).Error; err != nil {
+			return err
+		}
+		book.State = Idle
+		if err := tx.Model(&book).Select("state").Updates(&book).Error; err != nil {
+			return err
+		}
 		return nil
 	})
+	if err != nil {
+		result.Status = ReturnFailed
+		result.Msg = err.Error()
+	} else {
+		result.Status = ReturnOK
+		result.Msg = "归还成功"
+	}
 	return result
 }
 
 func (agent *DBAgent) ReserveBook(userId int, bookId int) StatusResult {
 	result := StatusResult{}
-	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
-		// 判断bookId
-		if err := tx.First(&Book{}, bookId).Error; err != nil {
-			result.Status = ReserveFailed
-			result.Msg = "预约失败"
+	err := agent.DB.Transaction(func(tx *gorm.DB) error {
+		// 判断图书状态
+		book := Book{}
+		if err := tx.First(&book, bookId).Error; err != nil {
 			return err
 		}
-
-		reserveBook := ReserveBook{}
-		// 判断该书是否已经被预约
-		if err := tx.Where("book_id = ?", bookId).Last(&reserveBook).Error; err == nil {
-			if reserveBook.EndTime == "" {
-				result.Status = ReserveFailed
-				result.Msg = "预约失败，该图书已经被预约了"
-				return nil
-			}
+		if book.State == Damaged {
+			return errors.New("预约失败，图书已经损毁")
 		}
-
-		// 判断该书是否已经被借出
-		borrowBook := &BorrowBook{}
-		if err := tx.Where("book_id = ?", bookId).Last(&borrowBook).Error; err == nil {
-			if borrowBook.EndTime == "" {
-				result.Status = ReserveFailed
-				result.Msg = "预约失败，该图书已经被借出了"
-				return nil
-			}
+		if book.State == Lost {
+			return errors.New("预约失败，图书已经遗失")
+		}
+		if book.State == Reserved {
+			return errors.New("预约失败，图书已经被预约")
+		}
+		if book.State == Borrowed {
+			return errors.New("预约失败，图书已经被借出")
 		}
 
 		newReserveBook := &ReserveBook{
@@ -270,52 +262,61 @@ func (agent *DBAgent) ReserveBook(userId int, bookId int) StatusResult {
 			StartTime: util.TimeToString(time.Now()),
 		}
 		if err := tx.Select("book_id", "user_id", "start_time").Create(&newReserveBook).Error; err != nil {
-			result.Status = ReserveFailed
-			result.Msg = "预约失败"
+			return err
+		}
+		book.State = Reserved
+		if err := tx.Model(&book).Select("state").Updates(&book).Error; err != nil {
 			return err
 		}
 
-		result.Status = ReserveOK
-		result.Msg = "预约成功"
 		return nil
 	})
+	if err != nil {
+		result.Status = ReserveFailed
+		result.Msg = err.Error()
+	} else {
+		result.Status = ReserveOK
+		result.Msg = "预约成功"
+	}
 	return result
 }
 
 func (agent *DBAgent) CancelReserveBook(userId int, bookId int) StatusResult {
 	result := StatusResult{}
-	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
-		reserveBook := ReserveBook{}
-		// 先判断该书是否已经被预约
-		if err := tx.Where("book_id = ?", bookId).Last(&reserveBook).Error; err == nil {
-			if reserveBook.EndTime != "" {
-				result.Status = CancelReserveFailed
-				result.Msg = "取消预约失败，该图书未被预约"
-				return nil
-			}
-
-			if userId != reserveBook.UserId {
-				result.Status = CancelReserveFailed
-				result.Msg = "取消预约失败，该图书不是被你预约的"
-				return nil
-			}
-
-			reserveBook.EndTime = util.TimeToString(time.Now())
-			if err := tx.Model(&reserveBook).Select("end_time").Updates(&reserveBook).Error; err != nil {
-				result.Status = CancelReserveFailed
-				result.Msg = "取消预约失败"
-				return err
-			}
-
-			result.Status = CancelReserveOK
-			result.Msg = "取消预约成功"
-			return nil
-		} else {
-			result.Status = CancelReserveFailed
-			result.Msg = "取消预约失败，该图书未被预约"
-			return nil
+	err := agent.DB.Transaction(func(tx *gorm.DB) error {
+		book := Book{}
+		if err := tx.First(&book, bookId).Error; err != nil {
+			return err
 		}
+		if book.State != Reserved {
+			return errors.New("取消预约失败，该图书未被预约")
+		}
+		reserveBook := ReserveBook{}
+		if err := tx.Where("book_id = ?", bookId).Last(&reserveBook).Error; err != nil {
+			return err
+		}
+
+		if userId != reserveBook.UserId {
+			return errors.New("取消预约失败，该图书不是你预约的")
+		}
+
+		reserveBook.EndTime = util.TimeToString(time.Now())
+		if err := tx.Model(&reserveBook).Select("end_time").Updates(&reserveBook).Error; err != nil {
+			return err
+		}
+		book.State = Idle
+		if err := tx.Model(&book).Select("state").Updates(&book).Error; err != nil {
+			return err
+		}
+		return nil
 	})
+	if err != nil {
+		result.Status = CancelReserveFailed
+		result.Msg = err.Error()
+	} else {
+		result.Status = CancelReserveOK
+		result.Msg = "取消预约成功"
+	}
 	return result
 }
 
@@ -360,6 +361,36 @@ func GetMemberFine(db *gorm.DB, userId int) int {
 		return nil
 	})
 	return user.Debt
+}
+
+func GetMemberHistoryFine(db *gorm.DB, userId int) int {
+	borrowBooks := make([]BorrowBook, 0)
+	fine := 0
+	_ = db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("user_id = ?", userId).Find(&borrowBooks).Error; err != nil {
+			return err
+		}
+		for _, borrowBook := range borrowBooks {
+			status := BorrowBookStatus{}
+			status.StartTime = borrowBook.StartTime
+			status.EndTime = borrowBook.EndTime
+			fine += CalculateFine(status)
+		}
+		return nil
+	})
+	return fine
+}
+
+func (agent *DBAgent) GetMemberCurrentBorrowCount(userId int) int {
+	var count int64
+	agent.DB.Model(&BorrowBook{}).Where("user_id = ? and end_time is null", userId).Count(&count)
+	return int(count)
+}
+
+func (agent *DBAgent) GetMemberCurrentReserveCount(userId int) int {
+	var count int64
+	agent.DB.Model(&ReserveBook{}).Where("user_id = ? and end_time is null", userId).Count(&count)
+	return int(count)
 }
 
 func (agent *Agent) GetPayMemberFineURL(userId int) (urlStr string) {

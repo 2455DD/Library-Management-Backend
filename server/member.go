@@ -10,21 +10,21 @@ import (
 )
 
 func getBorrowBooksPagesHandler(context *gin.Context) {
-	iUserID, _ := context.Get("userId")
-	userID := iUserID.(int)
-	context.JSON(http.StatusOK, gin.H{"page": dbAgent.GetMemberBorrowBooksPages(userID)})
+	iUserId, _ := context.Get("userId")
+	userId := iUserId.(int)
+	context.JSON(http.StatusOK, gin.H{"page": dbAgent.GetMemberBorrowBooksPages(userId)})
 }
 
 func getBorrowBooksHandler(context *gin.Context) {
-	iUserID, _ := context.Get("userId")
-	userID := iUserID.(int)
+	iUserId, _ := context.Get("userId")
+	userId := iUserId.(int)
 	pageStr := context.PostForm("page")
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
 		context.Status(http.StatusBadRequest)
 		return
 	}
-	books := dbAgent.GetMemberBorrowBooks(userID, page)
+	books := dbAgent.GetMemberBorrowBooks(userId, page)
 
 	bf := bytes.NewBuffer([]byte{})
 	encoder := json.NewEncoder(bf)
@@ -35,21 +35,21 @@ func getBorrowBooksHandler(context *gin.Context) {
 }
 
 func getReserveBooksPagesHandler(context *gin.Context) {
-	iUserID, _ := context.Get("userId")
-	userID := iUserID.(int)
-	context.JSON(http.StatusOK, gin.H{"page": dbAgent.GetMemberReserveBooksPages(userID)})
+	iUserId, _ := context.Get("userId")
+	userId := iUserId.(int)
+	context.JSON(http.StatusOK, gin.H{"page": dbAgent.GetMemberReserveBooksPages(userId)})
 }
 
 func getReserveBooksHandler(context *gin.Context) {
-	iUserID, _ := context.Get("userId")
-	userID := iUserID.(int)
+	iUserId, _ := context.Get("userId")
+	userId := iUserId.(int)
 	pageStr := context.PostForm("page")
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
 		context.Status(http.StatusBadRequest)
 		return
 	}
-	books := dbAgent.GetMemberReserveBooks(userID, page)
+	books := dbAgent.GetMemberReserveBooks(userId, page)
 
 	bf := bytes.NewBuffer([]byte{})
 	encoder := json.NewEncoder(bf)
@@ -60,11 +60,13 @@ func getReserveBooksHandler(context *gin.Context) {
 }
 
 func borrowBookHandler(context *gin.Context) {
-	iUserID, _ := context.Get("userId")
-	userID := iUserID.(int)
-	bookIDString := context.PostForm("bookId")
-	bookID, _ := strconv.Atoi(bookIDString)
-	result := agent.BorrowBook(userID, bookID)
+	userId, err1 := strconv.Atoi(context.PostForm("userId"))
+	bookId, err2 := strconv.Atoi(context.PostForm("bookId"))
+	if err1 != nil || err2 != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	result := agent.BorrowBook(userId, bookId)
 	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
 }
 
@@ -108,11 +110,32 @@ func getMemberFineHandler(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"fine": fine})
 }
 
+func getMemberHistoryFineHandler(context *gin.Context) {
+	iUserId, _ := context.Get("userId")
+	userId := iUserId.(int)
+	fine := GetMemberHistoryFine(agent.DB, userId)
+	context.JSON(http.StatusOK, gin.H{"fine": fine})
+}
+
 func getMemberPayURLHandler(context *gin.Context) {
 	iUserId, _ := context.Get("userId")
 	userId := iUserId.(int)
 	url := agent.GetPayMemberFineURL(userId)
 	context.JSON(http.StatusOK, gin.H{"url": url})
+}
+
+func getMemberCurrentBorrowCountHandler(context *gin.Context) {
+	iUserId, _ := context.Get("userId")
+	userId := iUserId.(int)
+	count := agent.GetMemberCurrentBorrowCount(userId)
+	context.JSON(http.StatusOK, gin.H{"count": count})
+}
+
+func getMemberCurrentReserveCountHandler(context *gin.Context) {
+	iUserId, _ := context.Get("userId")
+	userId := iUserId.(int)
+	count := agent.GetMemberCurrentReserveCount(userId)
+	context.JSON(http.StatusOK, gin.H{"count": count})
 }
 
 func updatePasswordHandler(context *gin.Context) {
@@ -125,5 +148,17 @@ func updatePasswordHandler(context *gin.Context) {
 		return
 	}
 	result := agent.UpdatePassword(userId, oldPassword, newPassword)
+	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
+}
+
+func updateEmailHandler(context *gin.Context) {
+	iUserId, _ := context.Get("userId")
+	userId := iUserId.(int)
+	newEmail, ok := context.GetPostForm("newEmail")
+	if !ok {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	result := agent.UpdateEmail(userId, newEmail)
 	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
 }

@@ -22,13 +22,14 @@ type Agent struct {
 }
 
 type Book struct {
-	Id         int    `column:"id" gorm:"primaryKey"`
-	Name       string `column:"name"`
-	Author     string `column:"author"`
-	Isbn       string `column:"isbn"`
-	Language   string `column:"language"`
-	LocationId int    `column:"location_id"`
-	CategoryId int    `column:"category_id"`
+	Id         int       `column:"id" gorm:"primaryKey"`
+	Name       string    `column:"name"`
+	Author     string    `column:"author"`
+	Isbn       string    `column:"isbn"`
+	Language   string    `column:"language"`
+	LocationId int       `column:"location_id"`
+	CategoryId int       `column:"category_id"`
+	State      BookState `column:"state"`
 }
 
 type BookMetaData struct {
@@ -39,7 +40,7 @@ type BookMetaData struct {
 	Language string
 	Location string
 	Category string
-	Status   BookStatus
+	State    BookState
 }
 
 type ReserveBook struct {
@@ -68,12 +69,21 @@ type Category struct {
 	Name     string `gorm:"column:name"`
 }
 
-type BookStatus int
+type BookState int
+
+type MemberState int
 
 const (
-	Idle BookStatus = iota
+	Idle BookState = iota
 	Reserved
 	Borrowed
+	Damaged
+	Lost
+)
+
+const (
+	Available = iota
+	Unavailable
 )
 
 type ReserveBookStatus struct {
@@ -135,6 +145,8 @@ const (
 	AddCategoryOK
 	AddLocationFailed
 	AddLocationOK
+	UpdateEmailFailed
+	UpdateEmailOK
 )
 
 var (
@@ -174,7 +186,7 @@ func (agent *DBAgent) getBookData(book *Book) BookMetaData {
 		Language: book.Language,
 		Location: "",
 		Category: "",
-		Status:   Idle,
+		State:    book.State,
 	}
 
 	location := Location{}
@@ -185,12 +197,6 @@ func (agent *DBAgent) getBookData(book *Book) BookMetaData {
 	agent.DB.First(&category, book.CategoryId)
 	bookData.Category = category.Name
 
-	if err := agent.DB.Where("book_id = ? and end_time is null", book.Id).Last(&ReserveBook{}).Error; err == nil {
-		bookData.Status = Reserved
-	}
-	if err := agent.DB.Where("book_id = ? and end_time is null", book.Id).Last(&BorrowBook{}).Error; err == nil {
-		bookData.Status = Borrowed
-	}
 	return bookData
 }
 
@@ -213,7 +219,7 @@ func (agent *DBAgent) GetBooksPages() int64 {
 
 func (agent *DBAgent) GetBooksByPage(page int) []BookMetaData {
 	books := make([]Book, 0)
-	agent.DB.Offset((page - 1) * 10).Limit(10).Find(&books)
+	agent.DB.Offset((page - 1) * itemsPerPage).Limit(itemsPerPage).Find(&books)
 	return agent.getBooksData(books)
 }
 
@@ -227,7 +233,7 @@ func (agent *DBAgent) GetBooksPagesByCategory(categoryId int) int64 {
 
 func (agent *DBAgent) GetBooksByCategory(page int, categoryId int) []BookMetaData {
 	books := make([]Book, 0)
-	agent.DB.Where("category_id = ?", categoryId).Offset((page - 1) * 10).Limit(10).Find(&books)
+	agent.DB.Where("category_id = ?", categoryId).Offset((page - 1) * itemsPerPage).Limit(itemsPerPage).Find(&books)
 	return agent.getBooksData(books)
 }
 
@@ -241,7 +247,7 @@ func (agent *DBAgent) GetBooksPagesByLocation(locationId int) int64 {
 
 func (agent *DBAgent) GetBooksByLocation(page int, locationId int) []BookMetaData {
 	books := make([]Book, 0)
-	agent.DB.Where("location_id = ?", locationId).Offset((page - 1) * 10).Limit(10).Find(&books)
+	agent.DB.Where("location_id = ?", locationId).Offset((page - 1) * itemsPerPage).Limit(itemsPerPage).Find(&books)
 	return agent.getBooksData(books)
 }
 
@@ -261,8 +267,12 @@ func (agent *DBAgent) UpdatePassword(userId int, oldPassword string, newPassword
 	result := StatusResult{}
 	err := agent.DB.Transaction(func(tx *DB) error {
 		user := User{}
-		if err := tx.First(&user, userId).Error; err != nil {
-			return err
+		t := tx.First(&user, userId)
+		if t.Error != nil {
+			return t.Error
+		}
+		if user.State == Unavailable {
+			return errors.New("账号已注销")
 		}
 		if user.Password != oldPassword {
 			return errors.New("密码不正确")
@@ -275,9 +285,35 @@ func (agent *DBAgent) UpdatePassword(userId int, oldPassword string, newPassword
 	if err != nil {
 		result.Status = UpdatePasswordFailed
 		result.Msg = "修改密码失败"
-		return result
+	} else {
+		result.Status = UpdatePasswordOK
+		result.Msg = "修改密码成功"
 	}
-	result.Status = UpdatePasswordOK
-	result.Msg = "修改密码成功"
+	return result
+}
+
+func (agent *DBAgent) UpdateEmail(userId int, newEmail string) StatusResult {
+	result := StatusResult{}
+	err := agent.DB.Transaction(func(tx *DB) error {
+		user := User{}
+		t := tx.First(&user, userId)
+		if t.Error != nil {
+			return t.Error
+		}
+		if user.State == Unavailable {
+			return errors.New("账号已注销")
+		}
+		if err := tx.Model(&user).Update("email", newEmail).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		result.Status = UpdateEmailFailed
+		result.Msg = err.Error()
+	} else {
+		result.Status = UpdateEmailOK
+		result.Msg = "修改邮箱成功"
+	}
 	return result
 }
