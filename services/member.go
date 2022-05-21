@@ -336,8 +336,8 @@ func (agent *DBAgent) CancelReserveBook(userId int, bookId int) StatusResult {
 }
 
 //查询用户仪表盘函数
-func (agent *DBAgent) CountCurrentBorrowedBooks(userId int) StatusResult {
-	//查询现在借阅的图书量
+func (agent *DBAgent) CountHistoryBorrowedBooks(userId int) StatusResult {
+	//查询历史借阅的图书量
 	result := StatusResult{}
 	var count = 0
 	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
@@ -378,8 +378,8 @@ func (agent *DBAgent) TotalFineAmount(userId int) StatusResult {
 	return result
 }
 
-func (agent *DBAgent) ReserveState(userId int) StatusResult {
-	//预订状态（返回预定书籍的数量）
+func (agent *DBAgent) CountHistoryReservedBooks(userId int) StatusResult {
+	//查询历史预定的图书量
 	result := StatusResult{}
 	var count = 0
 	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
