@@ -211,7 +211,7 @@ func (agent *DBAgent) getBooksData(books []Book) []BookMetaData {
 
 func (agent *DBAgent) GetBooksPages() int64 {
 	var count int64
-	if err := agent.DB.Table("book").Count(&count).Error; err != nil {
+	if err := agent.DB.Where("state < ?", Damaged).Table("book").Count(&count).Error; err != nil {
 		return 0
 	}
 	return (count - 1) / itemsPerPage + 1
@@ -219,13 +219,13 @@ func (agent *DBAgent) GetBooksPages() int64 {
 
 func (agent *DBAgent) GetBooksByPage(page int) []BookMetaData {
 	books := make([]Book, 0)
-	agent.DB.Offset((page - 1) * itemsPerPage).Limit(itemsPerPage).Find(&books)
+	agent.DB.Where("state < ?", Damaged).Offset((page - 1) * itemsPerPage).Limit(itemsPerPage).Find(&books)
 	return agent.getBooksData(books)
 }
 
 func (agent *DBAgent) GetBooksPagesByCategory(categoryId int) int64 {
 	var count int64
-	if err := agent.DB.Table("book").Where("category_id = ?", categoryId).Count(&count).Error; err != nil {
+	if err := agent.DB.Table("book").Where("category_id = ? and state < ?", categoryId, Damaged).Count(&count).Error; err != nil {
 		return 0
 	}
 	return (count - 1) / itemsPerPage + 1
@@ -233,13 +233,13 @@ func (agent *DBAgent) GetBooksPagesByCategory(categoryId int) int64 {
 
 func (agent *DBAgent) GetBooksByCategory(page int, categoryId int) []BookMetaData {
 	books := make([]Book, 0)
-	agent.DB.Where("category_id = ?", categoryId).Offset((page - 1) * itemsPerPage).Limit(itemsPerPage).Find(&books)
+	agent.DB.Where("category_id = ? and state < ", categoryId, Damaged).Offset((page - 1) * itemsPerPage).Limit(itemsPerPage).Find(&books)
 	return agent.getBooksData(books)
 }
 
 func (agent *DBAgent) GetBooksPagesByLocation(locationId int) int64 {
 	var count int64
-	if err := agent.DB.Table("book").Where("location_id = ?", locationId).Count(&count).Error; err != nil {
+	if err := agent.DB.Table("book").Where("location_id = ? and state < ?", locationId, Damaged).Count(&count).Error; err != nil {
 		return 0
 	}
 	return (count - 1) / itemsPerPage + 1
@@ -247,7 +247,7 @@ func (agent *DBAgent) GetBooksPagesByLocation(locationId int) int64 {
 
 func (agent *DBAgent) GetBooksByLocation(page int, locationId int) []BookMetaData {
 	books := make([]Book, 0)
-	agent.DB.Where("location_id = ?", locationId).Offset((page - 1) * itemsPerPage).Limit(itemsPerPage).Find(&books)
+	agent.DB.Where("location_id = ? and state < ?", locationId, Damaged).Offset((page - 1) * itemsPerPage).Limit(itemsPerPage).Find(&books)
 	return agent.getBooksData(books)
 }
 

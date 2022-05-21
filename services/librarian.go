@@ -166,7 +166,7 @@ func (agent *DBAgent) GetBorrowBooksByPage(page int) []BorrowData {
 
 func (agent *DBAgent) GetMemberPages() int64 {
 	var count int64
-	if err := agent.DB.Table("user").Count(&count).Error; err != nil {
+	if err := agent.DB.Table("user").Where("state = ?", Available).Count(&count).Error; err != nil {
 		return 0
 	}
 	return (count - 1) / itemsPerPage + 1
@@ -176,7 +176,7 @@ func (agent *Agent) GetMembersByPage(page int) []UserData {
 	userArr := make([]UserData, 0)
 	users := make([]User, 0)
 	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
-		tx.Offset((page - 1) * itemsPerPage).Limit(itemsPerPage).Find(&users)
+		tx.Where("state = ?", Available).Offset((page - 1) * itemsPerPage).Limit(itemsPerPage).Find(&users)
 		for _, user := range users {
 			fine := GetMemberFine(tx, user.UserId)
 			userData := &UserData{
@@ -307,7 +307,7 @@ func (agent *DBAgent) GetMemberCount() int {
 
 func (agent *DBAgent) GetBookCountByISBN() int {
 	var count int64
-	if err := agent.DB.Table("book").Group("isbn").Count(&count).Error; err != nil {
+	if err := agent.DB.Table("book").Where("state < ?", Damaged).Group("isbn").Count(&count).Error; err != nil {
 		return 0
 	}
 	return int(count)
@@ -315,7 +315,7 @@ func (agent *DBAgent) GetBookCountByISBN() int {
 
 func (agent *DBAgent) GetBookCountByCopy() int {
 	var count int64
-	if err := agent.DB.Table("book").Count(&count).Error; err != nil {
+	if err := agent.DB.Table("book").Where("state < ", Damaged).Count(&count).Error; err != nil {
 		return 0
 	}
 	return int(count)
