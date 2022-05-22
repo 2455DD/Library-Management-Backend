@@ -118,6 +118,7 @@ func startService() {
 		g2.POST("/getAllMembers", getAllMembersHandler)
 		g2.POST("/getMembersHasDebtPages", getMembersHasDebtPagesHandler)
 		g2.POST("/getMembersHasDebt", getMembersHasDebtHandler)
+		g2.POST("/readerDashboard", getReaderDashboardHandler)
 	}
 
 	router.POST("/login", loginHandler)

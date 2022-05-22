@@ -22,11 +22,11 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f809108a-1921-4486-bc49-f57b44597639" name="Default Changelist" comment="现在可能没问题了">
+    <list default="true" id="f809108a-1921-4486-bc49-f57b44597639" name="Default Changelist" comment="初步完成并修改了用户仪表盘的开发">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/register.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/register.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/member.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/member.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/server.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/member.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/member.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,7 +40,7 @@
       </list>
     </option>
   </component>
-  <component name="GOROOT" path="D:\Go" />
+  <component name="GOROOT" url="file://D:/Golang" />
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
@@ -48,6 +48,14 @@
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
   </component>
   <component name="GithubPullRequestsUISettings">
     <option name="selectedUrlAndAccountId">
@@ -83,7 +91,7 @@
     <property name="go.sdk.automatically.set" value="true" />
     <property name="go.watchers.conflict.with.on.save.actions.check.performed" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="go.vgo" />
+    <property name="settings.editor.selected.configurable" value="vcs.Git" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -91,70 +99,70 @@
       <recent name="D:\WorkSpace\go\lms\services" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Build.go build lms/server">
+  <component name="RunManager" selected="Go 构建.go build lms/server">
     <configuration name="go build lms/server" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="lms" />
       <working_directory value="$PROJECT_DIR$" />
       <kind value="PACKAGE" />
-      <filePath value="$PROJECT_DIR$/server/httpServer.go" />
       <package value="lms/server" />
       <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/server/httpServer.go" />
       <method v="2" />
     </configuration>
     <configuration name="TestGetMetaDataByISBN in lms/services (1)" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="lms" />
       <working_directory value="$PROJECT_DIR$/services" />
-      <framework value="gotest" />
       <kind value="PACKAGE" />
       <package value="lms/services" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
       <pattern value="^\QTestGetMetaDataByISBN\E$" />
       <method v="2" />
     </configuration>
     <configuration name="TestGetMetaDataByISBN in lms/services (2)" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="lms" />
       <working_directory value="$PROJECT_DIR$/services" />
-      <framework value="gotest" />
       <kind value="PACKAGE" />
       <package value="lms/services" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
       <pattern value="^\QTestGetMetaDataByISBN\E$" />
       <method v="2" />
     </configuration>
     <configuration name="TestGetMetaDataByISBN in lms/services" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="lms" />
       <working_directory value="$PROJECT_DIR$/services" />
-      <framework value="gotest" />
       <kind value="PACKAGE" />
       <package value="lms/services" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
       <pattern value="^\QTestGetMetaDataByISBN\E$" />
       <method v="2" />
     </configuration>
     <configuration name="TestGetMetaDataByISBN/available in lms/services" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="lms" />
       <working_directory value="$PROJECT_DIR$/services" />
-      <framework value="gotest" />
       <kind value="PACKAGE" />
       <package value="lms/services" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
       <pattern value="^\QTestGetMetaDataByISBN\E$/^\Qavailable\E$" />
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Go Build.go build lms/server" />
-      <item itemvalue="Go Test.TestGetMetaDataByISBN in lms/services (1)" />
-      <item itemvalue="Go Test.TestGetMetaDataByISBN in lms/services (2)" />
-      <item itemvalue="Go Test.TestGetMetaDataByISBN in lms/services" />
-      <item itemvalue="Go Test.TestGetMetaDataByISBN/available in lms/services" />
+      <item itemvalue="Go 构建.go build lms/server" />
+      <item itemvalue="Go 测试.TestGetMetaDataByISBN in lms/services" />
+      <item itemvalue="Go 测试.TestGetMetaDataByISBN in lms/services (1)" />
+      <item itemvalue="Go 测试.TestGetMetaDataByISBN in lms/services (2)" />
+      <item itemvalue="Go 测试.TestGetMetaDataByISBN/available in lms/services" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Go Build.go build lms/server" />
+        <item itemvalue="Go 构建.go build lms/server" />
       </list>
     </recent_temporary>
   </component>
@@ -184,11 +192,12 @@
         </entry>
       </map>
     </option>
-    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="fix: 修改查看借阅时间bug" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: 修改查看借阅时间bug" />
+    <MESSAGE value="初步完成了会员仪表盘的开发" />
+    <MESSAGE value="初步完成并修改了用户仪表盘的开发" />
+    <option name="LAST_COMMIT_MESSAGE" value="初步完成并修改了用户仪表盘的开发" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
@@ -197,27 +206,5 @@
         <entry key="GOPROXY" value="https://goproxy.cn,direct" />
       </map>
     </environment>
-  </component>
-  <component name="WindowStateProjectService">
-    <state x="702" y="435" key="#GOROOT" timestamp="1652958235965">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="702" y="435" key="#GOROOT/0.0.1920.1040@0.0.1920.1040" timestamp="1652958235965" />
-    <state width="1493" height="213" key="GridCell.Tab.0.bottom" timestamp="1651155777447">
-      <screen x="0" y="0" width="1536" height="834" />
-    </state>
-    <state width="1493" height="213" key="GridCell.Tab.0.bottom/0.0.1536.834@0.0.1536.834" timestamp="1651155777447" />
-    <state width="1493" height="213" key="GridCell.Tab.0.center" timestamp="1651155777447">
-      <screen x="0" y="0" width="1536" height="834" />
-    </state>
-    <state width="1493" height="213" key="GridCell.Tab.0.center/0.0.1536.834@0.0.1536.834" timestamp="1651155777447" />
-    <state width="1493" height="213" key="GridCell.Tab.0.left" timestamp="1651155777446">
-      <screen x="0" y="0" width="1536" height="834" />
-    </state>
-    <state width="1493" height="213" key="GridCell.Tab.0.left/0.0.1536.834@0.0.1536.834" timestamp="1651155777446" />
-    <state width="1493" height="213" key="GridCell.Tab.0.right" timestamp="1651155777447">
-      <screen x="0" y="0" width="1536" height="834" />
-    </state>
-    <state width="1493" height="213" key="GridCell.Tab.0.right/0.0.1536.834@0.0.1536.834" timestamp="1651155777447" />
   </component>
 </project>
