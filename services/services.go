@@ -233,7 +233,7 @@ func (agent *DBAgent) GetBooksPagesByCategory(categoryId int) int64 {
 
 func (agent *DBAgent) GetBooksByCategory(page int, categoryId int) []BookMetaData {
 	books := make([]Book, 0)
-	agent.DB.Where("category_id = ? and state < ", categoryId, Damaged).Offset((page - 1) * itemsPerPage).Limit(itemsPerPage).Find(&books)
+	agent.DB.Where("category_id = ? and state < ?", categoryId, Damaged).Offset((page - 1) * itemsPerPage).Limit(itemsPerPage).Find(&books)
 	return agent.getBooksData(books)
 }
 
