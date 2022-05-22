@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/go-ini/ini"
 	"io"
@@ -78,8 +79,8 @@ func startService() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
-	//router.LoadHTMLFiles(fmt.Sprintf("%v/index.html", path))
-	//router.Use(static.Serve("/static", static.LocalFile(staticPath, true)))
+	router.LoadHTMLFiles(fmt.Sprintf("%v/index.html", path))
+	router.Use(static.Serve("/static", static.LocalFile(staticPath, true)))
 
 	router.GET("/", func(context *gin.Context) {
 		context.HTML(http.StatusOK, "index.html", nil)
@@ -117,10 +118,9 @@ func startService() {
 		g2.POST("/getAllMembers", getAllMembersHandler)
 		g2.POST("/getMembersHasDebtPages", getMembersHasDebtPagesHandler)
 		g2.POST("/getMembersHasDebt", getMembersHasDebtHandler)
-		//g2.POST("/readerDashboard", getReaderDashboardHandler)
+		g2.POST("/readerDashboard", getReaderDashboardHandler)
 	}
 
-	router.POST("/readerDashboard", getReaderDashboardHandler)
 	router.POST("/login", loginHandler)
 	router.POST("/admin", adminLoginHandler)
 	router.GET("/getBooksPages", getBooksPagesHandler)
@@ -128,7 +128,7 @@ func startService() {
 	router.GET("/getBookBarcode", getBookBarcodeHandler)
 	router.GET("/getMemberBarcode", getMemberBarcodeHandler)
 
-	//router.StaticFile("/favicon.ico", fmt.Sprintf("%v/favicon.ico", path))
+	router.StaticFile("/favicon.ico", fmt.Sprintf("%v/favicon.ico", path))
 
 	err := router.Run(":" + strconv.Itoa(port))
 	if err != nil {

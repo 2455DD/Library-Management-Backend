@@ -336,8 +336,8 @@ func (agent *DBAgent) CancelReserveBook(userId int, bookId int) StatusResult {
 }
 
 //查询用户仪表盘函数
-func (agent *DBAgent) CountHistoryBorrowedBooks(userId int) StatusResult {
-	//查询历史借阅的图书量
+func (agent *DBAgent) CountCurrentBorrowedBooks(userId int) StatusResult {
+	//查询已经借阅但未归还的图书数量
 	result := StatusResult{}
 	var count = 0
 	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
@@ -348,8 +348,10 @@ func (agent *DBAgent) CountHistoryBorrowedBooks(userId int) StatusResult {
 			result.Msg = "查询失败，错误原因已打印"
 			return err
 		}
-		for range borrowBooks {
-			count++
+		for index := range borrowBooks {
+			if borrowBooks[index].EndTime == "" {
+				count++
+			}
 		}
 
 		result.Status = SearchOK
@@ -379,7 +381,7 @@ func (agent *DBAgent) TotalFineAmount(userId int) StatusResult {
 }
 
 func (agent *DBAgent) CountHistoryReservedBooks(userId int) StatusResult {
-	//查询历史预定的图书量
+	//查询已经完成预定的图书量
 	result := StatusResult{}
 	var count = 0
 	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
@@ -390,8 +392,37 @@ func (agent *DBAgent) CountHistoryReservedBooks(userId int) StatusResult {
 			result.Msg = "查询失败，错误原因已打印"
 			return err
 		}
-		for range reserveBooks {
-			count++
+		for index := range reserveBooks {
+			fmt.Println(index)
+			if reserveBooks[index].EndTime != "" {
+				count++
+			}
+		}
+
+		result.Status = SearchOK
+		result.Msg = strconv.Itoa(count)
+		return nil
+	})
+	return result
+}
+
+func (agent *DBAgent) CountCurrentReservedBooks(userId int) StatusResult {
+	//查询正在预定的图书量
+	result := StatusResult{}
+	var count = 0
+	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
+		var reserveBooks []ReserveBook
+		if err := tx.Where("user_id = ?", userId).Find(&reserveBooks).Error; err != nil {
+			fmt.Println(err)
+			result.Status = SearchFailed
+			result.Msg = "查询失败，错误原因已打印"
+			return err
+		}
+		for index := range reserveBooks {
+			fmt.Println(index)
+			if reserveBooks[index].EndTime == "" {
+				count++
+			}
 		}
 
 		result.Status = SearchOK
