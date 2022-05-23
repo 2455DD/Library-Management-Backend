@@ -315,7 +315,7 @@ func (agent *DBAgent) GetBookCountByISBN() int {
 
 func (agent *DBAgent) GetBookCountByCopy() int {
 	var count int64
-	if err := agent.DB.Table("book").Where("state < ", Damaged).Count(&count).Error; err != nil {
+	if err := agent.DB.Table("book").Where("state < ?", Damaged).Count(&count).Error; err != nil {
 		return 0
 	}
 	return int(count)
