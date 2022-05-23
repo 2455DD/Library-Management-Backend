@@ -16,3 +16,5 @@ require (
 	gorm.io/driver/mysql v1.3.3
 	gorm.io/gorm v1.23.4
 )
+
+replace github.com/dgrijalva/jwt-go => github.com/golang-jwt/jwt v3.2.2+incompatible
