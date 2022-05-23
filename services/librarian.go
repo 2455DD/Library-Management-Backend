@@ -291,6 +291,7 @@ func (agent DBAgent) GetMemberReturnHistoryByPage(page int, userID int) []Borrow
 
 func (agent *DBAgent) GetMemberFineHistoryByPage(page int, userID int) {
 	//TODO: DO THE FUCKING ME!
+
 }
 
 func (agent *DBAgent) GetMemberPages() int64 {

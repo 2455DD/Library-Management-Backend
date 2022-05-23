@@ -125,6 +125,29 @@ func getBorrowBooksByMemberIDHandler(context *gin.Context) {
 	_, _ = context.Writer.Write(bf.Bytes())
 }
 
+func getActiveBorrowHistoryByMemberIDHandler(context *gin.Context) {
+	pageStr := context.PostForm("page")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	userIDStr := context.PostForm("userid")
+	userid, userErr := strconv.Atoi(userIDStr)
+	if userErr != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	borrowData := agent.GetMemberActiveBorrowHistoryByPage(page, userid)
+
+	bf := bytes.NewBuffer([]byte{})
+	encoder := json.NewEncoder(bf)
+	encoder.SetEscapeHTML(false)
+	_ = encoder.Encode(borrowData)
+
+	_, _ = context.Writer.Write(bf.Bytes())
+}
+
 // FIXME: UNTESTED
 func getReserveHistorysByMemberIDHandler(context *gin.Context) {
 	pageStr := context.PostForm("page")
