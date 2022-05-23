@@ -386,3 +386,28 @@ func (agent *DBAgent) GetPaidFine() int {
 	})
 	return paidFine
 }
+
+func (agent *DBAgent) GetHistoryFineListPages() int64 {
+	var count int64
+	if err := agent.DB.Table("pay").Count(&count).Error; err != nil {
+		return 0
+	}
+	return (count - 1) / itemsPerPage + 1
+}
+
+func (agent *DBAgent) GetHistoryFineListByPage(page int) []FineData {
+	fineDataArr := make([]FineData, 0)
+	pays := make([]Pay, 0)
+	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
+		tx.Offset((page - 1) * itemsPerPage).Limit(itemsPerPage).Find(&pays)
+		for _, pay := range pays {
+			fineData := FineData{
+				Fine: pay.Amount,
+				Done: pay.Done,
+			}
+			fineDataArr = append(fineDataArr, fineData)
+		}
+		return nil
+	})
+	return fineDataArr
+}

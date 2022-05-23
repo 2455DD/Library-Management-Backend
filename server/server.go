@@ -1,14 +1,13 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-ini/ini"
 	"io"
 	"lms/middlewares"
 	. "lms/services"
+	"lms/util"
 	"log"
 	"net/http"
 	"strconv"
@@ -52,12 +51,7 @@ func getBooksHandler(context *gin.Context) {
 		return
 	}
 	books := dbAgent.GetBooksByPage(page)
-	bf := bytes.NewBuffer([]byte{})
-	encoder := json.NewEncoder(bf)
-	encoder.SetEscapeHTML(false)
-	_ = encoder.Encode(books)
-
-	_, _ = context.Writer.Write(bf.Bytes())
+	_, _ = context.Writer.Write(util.JsonEncode(books))
 }
 
 func getBooksByCategoryHandler(context *gin.Context) {
@@ -74,12 +68,7 @@ func getBooksByCategoryHandler(context *gin.Context) {
 		return
 	}
 	books := dbAgent.GetBooksByCategory(page, categoryId)
-	bf := bytes.NewBuffer([]byte{})
-	encoder := json.NewEncoder(bf)
-	encoder.SetEscapeHTML(false)
-	_ = encoder.Encode(books)
-
-	_, _ = context.Writer.Write(bf.Bytes())
+	_, _ = context.Writer.Write(util.JsonEncode(books))
 }
 
 func getBooksByLocationHandler(context *gin.Context) {
@@ -96,32 +85,17 @@ func getBooksByLocationHandler(context *gin.Context) {
 		return
 	}
 	books := dbAgent.GetBooksByCategory(page, locationId)
-	bf := bytes.NewBuffer([]byte{})
-	encoder := json.NewEncoder(bf)
-	encoder.SetEscapeHTML(false)
-	_ = encoder.Encode(books)
-
-	_, _ = context.Writer.Write(bf.Bytes())
+	_, _ = context.Writer.Write(util.JsonEncode(books))
 }
 
 func getCategoriesHandler(context *gin.Context) {
 	categories := dbAgent.GetCategories()
-	bf := bytes.NewBuffer([]byte{})
-	encoder := json.NewEncoder(bf)
-	encoder.SetEscapeHTML(false)
-	_ = encoder.Encode(categories)
-
-	_, _ = context.Writer.Write(bf.Bytes())
+	_, _ = context.Writer.Write(util.JsonEncode(categories))
 }
 
 func getLocationsHandler(context *gin.Context) {
 	locations := dbAgent.GetLocations()
-	bf := bytes.NewBuffer([]byte{})
-	encoder := json.NewEncoder(bf)
-	encoder.SetEscapeHTML(false)
-	_ = encoder.Encode(locations)
-
-	_, _ = context.Writer.Write(bf.Bytes())
+	_, _ = context.Writer.Write(util.JsonEncode(locations))
 }
 
 func getBookBarcodeHandler(context *gin.Context) {
@@ -186,6 +160,8 @@ func startService() {
 		g1.POST("/getMemberCurrentReserveCount", getMemberCurrentReserveCountHandler)
 		g1.POST("/updatePassword", updatePasswordHandler)
 		g1.POST("/updateEmail", updateEmailHandler)
+		g1.POST("/getMemberHistoryFineListPages", getMemberHistoryFineListPagesHandler)
+		g1.POST("/getMemberHistoryFineList", getMemberHistoryFineListHandler)
 	}
 
 	g2 := router.Group("/")
@@ -215,6 +191,8 @@ func startService() {
 		g2.POST("/getLostBookCount", getLostBookCountHandler)
 		g2.POST("/getUnpaidFine", getUnpaidFineHandler)
 		g2.POST("/getPaidFine", getPaidFineHandler)
+		g2.POST("/getHistoryFineListPages", getHistoryFineListPagesHandler)
+		g2.POST("/getHistoryFineList", getHistoryFineListHandler)
 	}
 
 	router.POST("/login", loginHandler)

@@ -1,10 +1,9 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"github.com/gin-gonic/gin"
 	. "lms/services"
+	"lms/util"
 	"log"
 	"net/http"
 	"strconv"
@@ -31,12 +30,7 @@ func addBookHandler(context *gin.Context) {
 			log.Printf("Fail To Add Book %v (ISBN:%v)  \n", book.Name, book.Isbn)
 		}
 	}
-	bf := bytes.NewBuffer([]byte{})
-	encoder := json.NewEncoder(bf)
-	encoder.SetEscapeHTML(false)
-	_ = encoder.Encode(bookIdArr)
-
-	_, _ = context.Writer.Write(bf.Bytes())
+	_, _ = context.Writer.Write(util.JsonEncode(bookIdArr))
 }
 
 func updateBookHandler(context *gin.Context) {
@@ -98,13 +92,7 @@ func getAllBorrowBooksHandler(context *gin.Context) {
 		return
 	}
 	books := agent.GetBorrowBooksByPage(page)
-
-	bf := bytes.NewBuffer([]byte{})
-	encoder := json.NewEncoder(bf)
-	encoder.SetEscapeHTML(false)
-	_ = encoder.Encode(books)
-
-	_, _ = context.Writer.Write(bf.Bytes())
+	_, _ = context.Writer.Write(util.JsonEncode(books))
 }
 
 func getAllMembersPagesHandler(context *gin.Context) {
@@ -119,13 +107,7 @@ func getAllMembersHandler(context *gin.Context) {
 		return
 	}
 	users := agent.GetMembersByPage(page)
-
-	bf := bytes.NewBuffer([]byte{})
-	encoder := json.NewEncoder(bf)
-	encoder.SetEscapeHTML(false)
-	_ = encoder.Encode(users)
-
-	_, _ = context.Writer.Write(bf.Bytes())
+	_, _ = context.Writer.Write(util.JsonEncode(users))
 }
 
 func getMembersHasDebtPagesHandler(context *gin.Context) {
@@ -140,13 +122,7 @@ func getMembersHasDebtHandler(context *gin.Context) {
 		return
 	}
 	users := agent.GetMembersHasDebtByPage(page)
-
-	bf := bytes.NewBuffer([]byte{})
-	encoder := json.NewEncoder(bf)
-	encoder.SetEscapeHTML(false)
-	_ = encoder.Encode(users)
-
-	_, _ = context.Writer.Write(bf.Bytes())
+	_, _ = context.Writer.Write(util.JsonEncode(users))
 }
 
 func deleteMemberHandler(context *gin.Context) {
@@ -214,4 +190,18 @@ func getUnpaidFineHandler(context *gin.Context) {
 
 func getPaidFineHandler(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"count": agent.GetPaidFine()})
+}
+
+func getHistoryFineListPagesHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{"page": agent.GetHistoryFineListPages()})
+}
+
+func getHistoryFineListHandler(context *gin.Context) {
+	page, err := strconv.Atoi(context.PostForm("page"))
+	if err != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	fineList := agent.GetHistoryFineListByPage(page)
+	_, _ = context.Writer.Write(util.JsonEncode(fineList))
 }

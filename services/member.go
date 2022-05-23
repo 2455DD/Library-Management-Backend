@@ -450,3 +450,28 @@ func (agent *Agent) GetPayMemberFineURL(userId int) (urlStr string) {
 	urlStr = string(urlBytes)
 	return
 }
+
+func (agent *DBAgent) GetMemberHistoryFineListPages(userId int) int64 {
+	var count int64
+	if err := agent.DB.Table("pay").Where("user_id = ?", userId).Count(&count).Error; err != nil {
+		return 0
+	}
+	return (count - 1) / itemsPerPage + 1
+}
+
+func (agent *DBAgent) GetMemberHistoryFineListByPage(userId int, page int) []FineData {
+	fineDataArr := make([]FineData, 0)
+	pays := make([]Pay, 0)
+	_ = agent.DB.Transaction(func(tx *gorm.DB) error {
+		tx.Where("user_id = ?", userId).Offset((page - 1) * itemsPerPage).Limit(itemsPerPage).Find(&pays)
+		for _, pay := range pays {
+			fineData := FineData{
+				Fine:      pay.Amount,
+				Done:      pay.Done,
+			}
+			fineDataArr = append(fineDataArr, fineData)
+		}
+		return nil
+	})
+	return fineDataArr
+}

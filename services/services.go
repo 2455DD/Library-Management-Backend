@@ -69,6 +69,11 @@ type Category struct {
 	Name     string `gorm:"column:name"`
 }
 
+type FineData struct {
+	Fine      int
+	Done      int
+}
+
 type BookState int
 
 type MemberState int

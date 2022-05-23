@@ -1,10 +1,9 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"github.com/gin-gonic/gin"
 	. "lms/services"
+	"lms/util"
 	"net/http"
 	"strconv"
 )
@@ -25,13 +24,7 @@ func getBorrowBooksHandler(context *gin.Context) {
 		return
 	}
 	books := dbAgent.GetMemberBorrowBooks(userId, page)
-
-	bf := bytes.NewBuffer([]byte{})
-	encoder := json.NewEncoder(bf)
-	encoder.SetEscapeHTML(false)
-	_ = encoder.Encode(books)
-
-	_, _ = context.Writer.Write(bf.Bytes())
+	_, _ = context.Writer.Write(util.JsonEncode(books))
 }
 
 func getReserveBooksPagesHandler(context *gin.Context) {
@@ -50,13 +43,7 @@ func getReserveBooksHandler(context *gin.Context) {
 		return
 	}
 	books := dbAgent.GetMemberReserveBooks(userId, page)
-
-	bf := bytes.NewBuffer([]byte{})
-	encoder := json.NewEncoder(bf)
-	encoder.SetEscapeHTML(false)
-	_ = encoder.Encode(books)
-
-	_, _ = context.Writer.Write(bf.Bytes())
+	_, _ = context.Writer.Write(util.JsonEncode(books))
 }
 
 func borrowBookHandler(context *gin.Context) {
@@ -161,4 +148,23 @@ func updateEmailHandler(context *gin.Context) {
 	}
 	result := agent.UpdateEmail(userId, newEmail)
 	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
+}
+
+func getMemberHistoryFineListPagesHandler(context *gin.Context) {
+	iUserId, _ := context.Get("userId")
+	userId := iUserId.(int)
+	page := agent.GetMemberHistoryFineListPages(userId)
+	context.JSON(http.StatusOK, gin.H{"page": page})
+}
+
+func getMemberHistoryFineListHandler(context *gin.Context) {
+	iUserId, _ := context.Get("userId")
+	userId := iUserId.(int)
+	page, err := strconv.Atoi(context.PostForm("page"))
+	if err != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	fineList := agent.GetMemberHistoryFineListByPage(userId, page)
+	_, _ = context.Writer.Write(util.JsonEncode(fineList))
 }
