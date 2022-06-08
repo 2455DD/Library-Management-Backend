@@ -15,6 +15,7 @@ import (
 
 var port int
 var path string
+
 var staticPath string
 
 var agent Agent
@@ -136,12 +137,12 @@ func startService() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
-/*	router.LoadHTMLFiles(fmt.Sprintf("%v/index.html", path))
-	router.Use(static.Serve("/static", static.LocalFile(staticPath, true)))
+	/*	router.LoadHTMLFiles(fmt.Sprintf("%v/index.html", path))
+		router.Use(static.Serve("/static", static.LocalFile(staticPath, true)))
 
-	router.GET("/", func(context *gin.Context) {
-		context.HTML(http.StatusOK, "index.html", nil)
-	})*/
+		router.GET("/", func(context *gin.Context) {
+			context.HTML(http.StatusOK, "index.html", nil)
+		})*/
 
 	g1 := router.Group("/")
 	g1.Use(middlewares.MemberAuth())
@@ -196,8 +197,10 @@ func startService() {
 		g2.POST("/getPaidFine", getPaidFineHandler)
 		g2.POST("/getHistoryFineListPages", getHistoryFineListPagesHandler)
 		g2.POST("/getHistoryFineList", getHistoryFineListHandler)
-		g2.POST("/getMemberReturnHistory", getMemberReturnHistoryByPage)
-		g2.POST("/getMemberBorrowHistory", getActiveBorrowHistoryByMemberIDHandler)
+		g2.POST("/getMemberReturnHistory", getMemReturnHistoryHandler)
+		g2.POST("/getMemberReturnHistoryPage", getMemReturnHistoryPagesHandler)
+		g2.POST("/getMemberBorrowHistory", getMemActiveBorrowHistoryHandler)
+		g2.POST("/getMemberBorrowHistoryPage", getMemBorrowHistoryPagesHandler)
 		g2.POST("/readerDashboard", getReaderDashboardHandler)
 	}
 

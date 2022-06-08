@@ -97,6 +97,16 @@ func getAllBorrowBooksHandler(context *gin.Context) {
 	_, _ = context.Writer.Write(util.JsonEncode(books))
 }
 
+func getMemBorrowHistoryPagesHandler(context *gin.Context) {
+	userIDStr := context.PostForm("userid")
+	userid, userErr := strconv.Atoi(userIDStr)
+	if userErr != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{"page": agent.GetMemBorrowHistoryPages(userid)})
+}
+
 // FIXME:UNTESTED
 func getBorrowBooksByMemberIDHandler(context *gin.Context) {
 	pageStr := context.PostForm("page")
@@ -111,7 +121,7 @@ func getBorrowBooksByMemberIDHandler(context *gin.Context) {
 		context.Status(http.StatusBadRequest)
 		return
 	}
-	books := agent.GetMemberOverdueHistoryByPage(page, userid)
+	books := agent.GetMemberBorrowHistoryByPage(page, userid)
 
 	bf := bytes.NewBuffer([]byte{})
 	encoder := json.NewEncoder(bf)
@@ -119,10 +129,6 @@ func getBorrowBooksByMemberIDHandler(context *gin.Context) {
 	_ = encoder.Encode(books)
 
 	_, _ = context.Writer.Write(bf.Bytes())
-}
-
-func getMemReturnHistoryPagesHandler(context *gin.Context) {
-	//context.JSON(http.StatusOK, gin.H{"page": agent.getMemReturnHistoryPages()})
 }
 
 func getMemActiveBorrowHistoryHandler(context *gin.Context) {
@@ -170,6 +176,16 @@ func getReserveHistorysByMemberIDHandler(context *gin.Context) {
 	_ = encoder.Encode(resv)
 
 	_, _ = context.Writer.Write(bf.Bytes())
+}
+
+func getMemReturnHistoryPagesHandler(context *gin.Context) {
+	userIDStr := context.PostForm("userid")
+	userid, userErr := strconv.Atoi(userIDStr)
+	if userErr != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{"page": agent.GetMemReturnHistoryPages(userid)})
 }
 
 //FIXME:UNTESTED

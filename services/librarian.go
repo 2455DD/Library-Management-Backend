@@ -169,6 +169,45 @@ func (agent *DBAgent) GetBorrowBooksByPage(page int) []BorrowData {
 	return borrowDataArr
 }
 
+func (agent DBAgent) GetMemBorrowHistoryPages(userID int) int64 {
+	var count int64
+	if err := agent.DB.Table("borrow").Where("user_id = ?",
+		userID).Count(&count).Error; err != nil {
+		return 0
+	}
+	return (count-1)/itemsPerPage + 1
+}
+
+func (agent *DBAgent) GetMemberBorrowHistoryByPage(page int, userID int) []BorrowData {
+	borrowDataArr := make([]BorrowData, 0)
+	borrowBooks := make([]BorrowBook, 0)
+	_ = agent.DB.Transaction(
+		func(tx *gorm.DB) error {
+			tx.Offset((page-1)*10).Limit(10).
+				Where("user_id = ?", userID).Find(&borrowBooks)
+			for _, borrowBook := range borrowBooks {
+				book := Book{}
+				if err := tx.First(&book, borrowBook.BookId).Error; err == nil {
+					status := BorrowBookStatus{
+						StartTime: borrowBook.StartTime,
+						EndTime:   borrowBook.EndTime,
+						Deadline:  util.StringToTime(borrowBook.StartTime).Add(time.Hour * 240).Format(util.GormTimeFormat),
+					}
+					status.BookMetaData, _ = agent.ConvertBook2BookMetaInfo(book)
+					status.Fine = CalculateFine(status)
+
+					data := BorrowData{}
+					data.BorrowBookStatus = status
+					data.UserId = borrowBook.UserId
+
+					borrowDataArr = append(borrowDataArr, data)
+				}
+			}
+			return nil
+		})
+	return borrowDataArr
+}
+
 func (agent *DBAgent) GetMemberActiveBorrowHistoryByPage(page int, userID int) []BorrowData {
 	borrowDataArr := make([]BorrowData, 0)
 	borrowBooks := make([]BorrowBook, 0)
@@ -230,6 +269,15 @@ func (agent *DBAgent) GetMemberOverdueHistoryByPage(page int, userID int) []Borr
 	return borrowDataArr
 }
 
+func (agent DBAgent) GetMemReserveHistoryPages(userID int) int64 {
+	var count int64
+	if err := agent.DB.Table("reserve").Where("user_id = ?",
+		userID).Count(&count).Error; err != nil {
+		return 0
+	}
+	return (count-1)/itemsPerPage + 1
+}
+
 func (agent *DBAgent) GetMemberReserveHistoryByPage(page int, userID int) []ReserveData {
 
 	reserveData := make([]ReserveBook, 0)
@@ -237,7 +285,7 @@ func (agent *DBAgent) GetMemberReserveHistoryByPage(page int, userID int) []Rese
 	_ = agent.DB.Transaction(
 		func(tx *gorm.DB) error {
 			tx.Offset((page-1)*10).Limit(10).
-				Where("user_id = ? AND endtime IS NULL)", userID).Find(&reserveData)
+				Where("user_id = ?", userID).Find(&reserveData)
 			for _, reserveEntry := range reserveData {
 				book := Book{}
 				if err := tx.First(&book, reserveEntry.BookId).Error; err == nil {
@@ -256,6 +304,15 @@ func (agent *DBAgent) GetMemberReserveHistoryByPage(page int, userID int) []Rese
 			return nil
 		})
 	return reserveBookData
+}
+
+func (agent DBAgent) GetMemReturnHistoryPages(userID int) int64 {
+	var count int64
+	if err := agent.DB.Table("borrow").Where("user_id = ? AND endtime IS NOT NULL",
+		userID).Count(&count).Error; err != nil {
+		return 0
+	}
+	return (count-1)/itemsPerPage + 1
 }
 
 func (agent DBAgent) GetMemberReturnHistoryByPage(page int, userID int) []BorrowData {
@@ -288,10 +345,6 @@ func (agent DBAgent) GetMemberReturnHistoryByPage(page int, userID int) []Borrow
 			return nil
 		})
 	return borrowDataArr
-}
-
-func (agent *DBAgent) GetMemberFineHistoryByPage(page int, userID int) {
-	// DEPRECATED
 }
 
 func (agent *DBAgent) GetMemberPages() int64 {
