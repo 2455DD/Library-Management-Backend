@@ -138,7 +138,7 @@ func (agent *DBAgent) GetBorrowBooksPages() int64 {
 	if err := agent.DB.Table("borrow").Count(&count).Error; err != nil {
 		return 0
 	}
-	return (count - 1) / itemsPerPage + 1
+	return (count-1)/itemsPerPage + 1
 }
 
 func (agent *DBAgent) GetBorrowBooksByPage(page int) []BorrowData {
@@ -179,12 +179,12 @@ func (agent *DBAgent) GetMemberActiveBorrowHistoryByPage(page int, userID int) [
 			for _, borrowBook := range borrowBooks {
 				book := Book{}
 				if err := tx.First(&book, borrowBook.BookId).Error; err == nil {
-					status := BorrowBookStatus{}
-					status.Book = book
-					status.StartTime = borrowBook.StartTime
-					status.EndTime = borrowBook.EndTime
-					deadline := util.StringToTime(borrowBook.StartTime).Add(time.Hour * 240)
-					status.Deadline = deadline.Format(util.GormTimeFormat)
+					status := BorrowBookStatus{
+						StartTime: borrowBook.StartTime,
+						EndTime:   borrowBook.EndTime,
+						Deadline:  util.StringToTime(borrowBook.StartTime).Add(time.Hour * 240).Format(util.GormTimeFormat),
+					}
+					status.BookMetaData, _ = agent.ConvertBook2BookMetaInfo(book)
 					status.Fine = CalculateFine(status)
 
 					data := BorrowData{}
@@ -211,7 +211,7 @@ func (agent *DBAgent) GetMemberOverdueHistoryByPage(page int, userID int) []Borr
 				book := Book{}
 				if err := tx.First(&book, borrowBook.BookId).Error; err == nil {
 					status := BorrowBookStatus{}
-					status.Book = book
+					status.BookMetaData, _ = agent.ConvertBook2BookMetaInfo(book)
 					status.StartTime = borrowBook.StartTime
 					status.EndTime = borrowBook.EndTime
 					deadline := util.StringToTime(borrowBook.StartTime).Add(time.Hour * 240)
@@ -242,7 +242,7 @@ func (agent *DBAgent) GetMemberReserveHistoryByPage(page int, userID int) []Rese
 				book := Book{}
 				if err := tx.First(&book, reserveEntry.BookId).Error; err == nil {
 					status := ReserveBookStatus{}
-					status.Book = book
+					status.BookMetaData, _ = agent.ConvertBook2BookMetaInfo(book)
 					status.StartTime = reserveEntry.StartTime
 					status.EndTime = reserveEntry.EndTime
 
@@ -271,7 +271,7 @@ func (agent DBAgent) GetMemberReturnHistoryByPage(page int, userID int) []Borrow
 				book := Book{}
 				if err := tx.First(&book, borrowBook.BookId).Error; err == nil {
 					status := BorrowBookStatus{}
-					status.Book = book
+					status.BookMetaData, _ = agent.ConvertBook2BookMetaInfo(book)
 					status.StartTime = borrowBook.StartTime
 					status.EndTime = borrowBook.EndTime
 					deadline := util.StringToTime(borrowBook.StartTime).Add(time.Hour * 240)
@@ -291,8 +291,7 @@ func (agent DBAgent) GetMemberReturnHistoryByPage(page int, userID int) []Borrow
 }
 
 func (agent *DBAgent) GetMemberFineHistoryByPage(page int, userID int) {
-	//TODO: DO THE FUCKING ME!
-
+	// DEPRECATED
 }
 
 func (agent *DBAgent) GetMemberPages() int64 {
@@ -300,7 +299,7 @@ func (agent *DBAgent) GetMemberPages() int64 {
 	if err := agent.DB.Table("user").Where("state = ?", Available).Count(&count).Error; err != nil {
 		return 0
 	}
-	return (count - 1) / itemsPerPage + 1
+	return (count-1)/itemsPerPage + 1
 }
 
 func (agent *Agent) GetMembersByPage(page int) []UserData {
@@ -328,7 +327,7 @@ func (agent *DBAgent) GetMembersHasDebtPages() int64 {
 	if err := agent.DB.Table("user").Where("debt > 0").Count(&count).Error; err != nil {
 		return 0
 	}
-	return (count - 1) / itemsPerPage + 1
+	return (count-1)/itemsPerPage + 1
 }
 
 func (agent *Agent) GetMembersHasDebtByPage(page int) []UserData {
@@ -523,7 +522,7 @@ func (agent *DBAgent) GetHistoryFineListPages() int64 {
 	if err := agent.DB.Table("pay").Count(&count).Error; err != nil {
 		return 0
 	}
-	return (count - 1) / itemsPerPage + 1
+	return (count-1)/itemsPerPage + 1
 }
 
 func (agent *DBAgent) GetHistoryFineListByPage(page int) []FineData {

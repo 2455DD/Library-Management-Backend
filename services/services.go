@@ -60,18 +60,18 @@ type BorrowBook struct {
 }
 
 type Location struct {
-	Id       int    `gorm:"column:id;primaryKey"`
-	Name     string `gorm:"column:name"`
+	Id   int    `gorm:"column:id;primaryKey"`
+	Name string `gorm:"column:name"`
 }
 
 type Category struct {
-	Id       int    `gorm:"column:id;primaryKey"`
-	Name     string `gorm:"column:name"`
+	Id   int    `gorm:"column:id;primaryKey"`
+	Name string `gorm:"column:name"`
 }
 
 type FineData struct {
-	Fine      int
-	Done      int
+	Fine int
+	Done int
 }
 
 type BookState int
@@ -221,7 +221,7 @@ func (agent *DBAgent) GetBooksPages() int64 {
 	if err := agent.DB.Where("state < ?", Damaged).Table("book").Count(&count).Error; err != nil {
 		return 0
 	}
-	return (count - 1) / itemsPerPage + 1
+	return (count-1)/itemsPerPage + 1
 }
 
 func (agent *DBAgent) GetBooksByPage(page int) []BookMetaData {
@@ -235,7 +235,7 @@ func (agent *DBAgent) GetBooksPagesByCategory(categoryId int) int64 {
 	if err := agent.DB.Table("book").Where("category_id = ? and state < ?", categoryId, Damaged).Count(&count).Error; err != nil {
 		return 0
 	}
-	return (count - 1) / itemsPerPage + 1
+	return (count-1)/itemsPerPage + 1
 }
 
 func (agent *DBAgent) GetBooksByCategory(page int, categoryId int) []BookMetaData {
@@ -249,7 +249,7 @@ func (agent *DBAgent) GetBooksPagesByLocation(locationId int) int64 {
 	if err := agent.DB.Table("book").Where("location_id = ? and state < ?", locationId, Damaged).Count(&count).Error; err != nil {
 		return 0
 	}
-	return (count - 1) / itemsPerPage + 1
+	return (count-1)/itemsPerPage + 1
 }
 
 func (agent *DBAgent) GetBooksByLocation(page int, locationId int) []BookMetaData {
@@ -268,6 +268,18 @@ func (agent *DBAgent) GetLocations() []Location {
 	locations := make([]Location, 0)
 	agent.DB.Find(&locations)
 	return locations
+}
+
+func (agent DBAgent) QueryLocation(locationID int) (Location, error) {
+	location := Location{}
+	agent.DB.Where("location_id = ?", locationID).First(&location)
+	return location, agent.DB.Error
+}
+
+func (agent DBAgent) QueryCategory(catID int) (Category, error) {
+	category := Category{}
+	agent.DB.Where("category_id = ?", catID).First(&category)
+	return category, agent.DB.Error
 }
 
 func (agent *DBAgent) UpdatePassword(userId int, oldPassword string, newPassword string) StatusResult {
@@ -323,4 +335,28 @@ func (agent *DBAgent) UpdateEmail(userId int, newEmail string) StatusResult {
 		result.Msg = "修改邮箱成功"
 	}
 	return result
+}
+
+func (agent *DBAgent) ConvertBook2BookMetaInfo(book Book) (BookMetaData, error) {
+	bookmd := BookMetaData{
+		Id:       book.Id,
+		Name:     book.Name,
+		Author:   book.Author,
+		Isbn:     book.Isbn,
+		Language: book.Language,
+		State:    book.State,
+	}
+	// Query Location
+	if tempL, temperr := agent.QueryLocation(book.LocationId); temperr != nil {
+		return BookMetaData{}, temperr
+	} else {
+		bookmd.Location = tempL.Name
+	}
+	// Query Category
+	if tempL, temperr := agent.QueryCategory(book.CategoryId); temperr != nil {
+		return BookMetaData{}, temperr
+	} else {
+		bookmd.Category = tempL.Name
+	}
+	return bookmd, nil
 }

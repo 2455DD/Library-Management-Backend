@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	. "lms/services"
 	"lms/util"
@@ -50,11 +52,11 @@ func updateBookHandler(context *gin.Context) {
 		return
 	}
 	book := Book{
-		Id:       bookId,
-		Name:     name,
-		Author:   author,
-		Isbn:     isbn,
-		Language: language,
+		Id:         bookId,
+		Name:       name,
+		Author:     author,
+		Isbn:       isbn,
+		Language:   language,
 		LocationId: locationId,
 		CategoryId: categoryId,
 	}
@@ -119,7 +121,11 @@ func getBorrowBooksByMemberIDHandler(context *gin.Context) {
 	_, _ = context.Writer.Write(bf.Bytes())
 }
 
-func getActiveBorrowHistoryByMemberIDHandler(context *gin.Context) {
+func getMemReturnHistoryPagesHandler(context *gin.Context) {
+	//context.JSON(http.StatusOK, gin.H{"page": agent.getMemReturnHistoryPages()})
+}
+
+func getMemActiveBorrowHistoryHandler(context *gin.Context) {
 	pageStr := context.PostForm("page")
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
@@ -167,7 +173,7 @@ func getReserveHistorysByMemberIDHandler(context *gin.Context) {
 }
 
 //FIXME:UNTESTED
-func getMemberReturnHistoryByPage(context *gin.Context) {
+func getMemReturnHistoryHandler(context *gin.Context) {
 	pageStr := context.PostForm("page")
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
