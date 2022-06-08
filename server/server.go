@@ -200,6 +200,8 @@ func startService() {
 		g2.POST("/getMemberReturnHistory", getMemberReturnHistoryHandler)
 		g2.POST("/getMemberReserveHistoryPages", getMemberReserveHistoryPagesHandler)
 		g2.POST("/getMemberReserveHistory", getMemberReserveHistoryHandler)
+		g2.POST("/getMemberFineHistoryPages", getMemberFineHistoryPagesHandler)
+		g2.POST("/getMemberFineHistory", getMemberFineHistoryHandler)
 	}
 
 	router.POST("/login", loginHandler)
@@ -215,7 +217,7 @@ func startService() {
 	router.GET("/getBookBarcode", getBookBarcodeHandler)
 	router.GET("/getMemberBarcode", getMemberBarcodeHandler)
 
-	//router.StaticFile("/favicon.ico", fmt.Sprintf("%v/favicon.ico", path))
+	router.StaticFile("/favicon.ico", fmt.Sprintf("%v/favicon.ico", path))
 
 	err := router.Run(":" + strconv.Itoa(port))
 	if err != nil {

@@ -273,3 +273,25 @@ func getMemberReserveHistoryHandler(context *gin.Context) {
 	}
 	context.JSON(http.StatusOK, gin.H{"page": agent.GetMemberReserveBooks(userId, page)})
 }
+
+func getMemberFineHistoryPagesHandler(context *gin.Context) {
+	userIdStr := context.PostForm("userId")
+	userId, err := strconv.Atoi(userIdStr)
+	if err != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{"page": agent.GetMemberHistoryFineListPages(userId)})
+}
+
+func getMemberFineHistoryHandler(context *gin.Context) {
+	userIdStr := context.PostForm("userId")
+	pageStr := context.PostForm("page")
+	userId, err1 := strconv.Atoi(userIdStr)
+	page, err2 := strconv.Atoi(pageStr)
+	if err1 != nil || err2 != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{"fine": agent.GetMemberHistoryFineListByPage(userId, page)})
+}
