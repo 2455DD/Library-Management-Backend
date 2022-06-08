@@ -205,3 +205,71 @@ func getHistoryFineListHandler(context *gin.Context) {
 	fineList := agent.GetHistoryFineListByPage(page)
 	_, _ = context.Writer.Write(util.JsonEncode(fineList))
 }
+
+func getMemberBorrowHistoryPagesHandler(context *gin.Context) {
+	userIdStr := context.PostForm("userId")
+	userId, err := strconv.Atoi(userIdStr)
+	if err != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{"page": agent.GetMemberBorrowBooksPages(userId)})
+}
+
+func getMemberBorrowHistoryHandler(context *gin.Context) {
+	userIdStr := context.PostForm("userId")
+	pageStr := context.PostForm("page")
+	userId, err1 := strconv.Atoi(userIdStr)
+	page, err2 := strconv.Atoi(pageStr)
+	if err1 != nil || err2 != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	borrow := agent.GetMemberBorrowBooks(userId, page)
+	_, _ = context.Writer.Write(util.JsonEncode(borrow))
+}
+
+func getMemberReturnHistoryPagesHandler(context *gin.Context) {
+	userIdStr := context.PostForm("userId")
+	userId, err := strconv.Atoi(userIdStr)
+	if err != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{"page": agent.GetMemberReturnHistoryPages(userId)})
+}
+
+func getMemberReturnHistoryHandler(context *gin.Context) {
+	userIdStr := context.PostForm("userId")
+	pageStr := context.PostForm("page")
+	userId, err1 := strconv.Atoi(userIdStr)
+	page, err2 := strconv.Atoi(pageStr)
+	if err1 != nil || err2 != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	borrow := agent.GetMemberReturnHistory(userId, page)
+	_, _ = context.Writer.Write(util.JsonEncode(borrow))
+}
+
+func getMemberReserveHistoryPagesHandler(context *gin.Context) {
+	userIdStr := context.PostForm("userId")
+	userId, err := strconv.Atoi(userIdStr)
+	if err != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{"page": agent.GetMemberReserveBooksPages(userId)})
+}
+
+func getMemberReserveHistoryHandler(context *gin.Context) {
+	userIdStr := context.PostForm("userId")
+	pageStr := context.PostForm("page")
+	userId, err1 := strconv.Atoi(userIdStr)
+	page, err2 := strconv.Atoi(pageStr)
+	if err1 != nil || err2 != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{"page": agent.GetMemberReserveBooks(userId, page)})
+}

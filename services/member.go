@@ -404,15 +404,19 @@ func (agent *Agent) GetPayMemberFineURL(userId int) (urlStr string) {
 		return
 	}
 
-	hasOldPay := false
+	createNewPay := false
 	err := db.Transaction(func(tx *gorm.DB) error {
 		// 判断是否有未支付的
 		if err := tx.Where("user_id = ?", userId).Last(&pay).Error; err == nil {
-			if pay.Done == 0 {
-				hasOldPay = true
+			if fine != pay.Amount && pay.Done != 1 {
+				createNewPay = true
+				pay.Done = -1
+				if err := tx.Model(&pay).Select("done").Updates(&pay).Error; err != nil {
+					return err
+				}
 			}
 		}
-		if !hasOldPay {
+		if createNewPay {
 			// 创建新的pay
 			user := User{}
 			if err := tx.First(&user, userId).Error; err != nil {
@@ -474,4 +478,30 @@ func (agent *DBAgent) GetMemberHistoryFineListByPage(userId int, page int) []Fin
 		return nil
 	})
 	return fineDataArr
+}
+
+func (agent *DBAgent) GetMemberReturnHistoryPages(userId int) int {
+	var count int64
+	agent.DB.Model(&BorrowBook{}).Where("user_id = ? and end_time is not null", userId).Count(&count)
+	return int((count - 1) / itemsPerPage + 1)
+}
+
+func (agent *DBAgent) GetMemberReturnHistory(userId int, page int) []BorrowBookStatus {
+	borrowBooks := make([]BorrowBook, 0)
+	statusArr := make([]BorrowBookStatus, 0)
+	agent.DB.Where("user_id = ? and end_time is not null", userId).Find(&borrowBooks).Offset((page - 1) * itemsPerPage).Limit(itemsPerPage)
+	for _, borrowBook := range borrowBooks {
+		book := Book{}
+		if err := agent.DB.First(&book, borrowBook.BookId).Error; err == nil {
+			status := BorrowBookStatus{}
+			status.BookMetaData = agent.getBookData(&book)
+			status.StartTime = borrowBook.StartTime
+			status.EndTime = borrowBook.EndTime
+			deadline := util.StringToTime(borrowBook.StartTime).Add(time.Hour * 240)
+			status.Deadline = deadline.Format(util.GormTimeFormat)
+			status.Fine = CalculateFine(status)
+			statusArr = append(statusArr, status)
+		}
+	}
+	return statusArr
 }

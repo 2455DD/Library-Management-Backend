@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/go-ini/ini"
 	"io"
@@ -136,12 +137,12 @@ func startService() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
-/*	router.LoadHTMLFiles(fmt.Sprintf("%v/index.html", path))
+	router.LoadHTMLFiles(fmt.Sprintf("%v/index.html", path))
 	router.Use(static.Serve("/static", static.LocalFile(staticPath, true)))
 
 	router.GET("/", func(context *gin.Context) {
 		context.HTML(http.StatusOK, "index.html", nil)
-	})*/
+	})
 
 	g1 := router.Group("/")
 	g1.Use(middlewares.MemberAuth())
@@ -193,6 +194,12 @@ func startService() {
 		g2.POST("/getPaidFine", getPaidFineHandler)
 		g2.POST("/getHistoryFineListPages", getHistoryFineListPagesHandler)
 		g2.POST("/getHistoryFineList", getHistoryFineListHandler)
+		g2.POST("/getMemberBorrowHistoryPages", getMemberBorrowHistoryPagesHandler)
+		g2.POST("/getMemberBorrowHistory", getMemberBorrowHistoryHandler)
+		g2.POST("/getMemberReturnHistoryPages", getMemberReturnHistoryPagesHandler)
+		g2.POST("/getMemberReturnHistory", getMemberReturnHistoryHandler)
+		g2.POST("/getMemberReserveHistoryPages", getMemberReserveHistoryPagesHandler)
+		g2.POST("/getMemberReserveHistory", getMemberReserveHistoryHandler)
 	}
 
 	router.POST("/login", loginHandler)
