@@ -1,10 +1,9 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"github.com/gin-gonic/gin"
 	. "lms/services"
+	"lms/util"
 	"log"
 	"net/http"
 	"strconv"
@@ -12,17 +11,18 @@ import (
 
 func addBookHandler(context *gin.Context) {
 	isbn := context.PostForm("isbn")
-	location := context.PostForm("location")
-	count, err := strconv.Atoi(context.PostForm("count"))
-	if err != nil {
+	locationId, err1 := strconv.Atoi(context.PostForm("locationId"))
+	categoryId, err2 := strconv.Atoi(context.PostForm("categoryId"))
+	count, err3 := strconv.Atoi(context.PostForm("count"))
+	if err1 != nil || err2 != nil || err3 != nil {
 		context.Status(http.StatusBadRequest)
 		return
 	}
-
 	book, err := GetMetaDataByISBN(isbn)
 	bookIdArr := make([]int, 0)
 	if err == nil {
-		book.Location = location
+		book.LocationId = locationId
+		book.CategoryId = categoryId
 		bookIdArr = dbAgent.AddBook(&book, count)
 		if len(bookIdArr) > 0 {
 			log.Printf("Add Book %v (ISBN:%v) Successfully \n", book.Name, book.Isbn)
@@ -30,12 +30,7 @@ func addBookHandler(context *gin.Context) {
 			log.Printf("Fail To Add Book %v (ISBN:%v)  \n", book.Name, book.Isbn)
 		}
 	}
-	bf := bytes.NewBuffer([]byte{})
-	encoder := json.NewEncoder(bf)
-	encoder.SetEscapeHTML(false)
-	_ = encoder.Encode(bookIdArr)
-
-	_, _ = context.Writer.Write(bf.Bytes())
+	_, _ = context.Writer.Write(util.JsonEncode(bookIdArr))
 }
 
 func updateBookHandler(context *gin.Context) {
@@ -47,30 +42,35 @@ func updateBookHandler(context *gin.Context) {
 	isbn := context.PostForm("isbn")
 	name := context.PostForm("name")
 	author := context.PostForm("author")
-	address := context.PostForm("address")
 	language := context.PostForm("language")
-	location := context.PostForm("location")
+	locationId, err1 := strconv.Atoi(context.PostForm("locationId"))
+	categoryId, err2 := strconv.Atoi(context.PostForm("categoryId"))
+	if err1 != nil || err2 != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
 	book := Book{
 		Id:       bookId,
 		Name:     name,
 		Author:   author,
 		Isbn:     isbn,
-		Address:  address,
 		Language: language,
-		Location: location,
+		LocationId: locationId,
+		CategoryId: categoryId,
 	}
 	result := agent.UpdateBook(&book)
 	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
 }
 
 func deleteBookHandler(context *gin.Context) {
-	bookId, err := strconv.Atoi(context.PostForm("bookId"))
-	if err != nil {
+	bookId, err1 := strconv.Atoi(context.PostForm("bookId"))
+	state, err2 := strconv.Atoi(context.PostForm("state"))
+	if err1 != nil || err2 != nil {
 		context.Status(http.StatusBadRequest)
 		return
 	}
-	result := agent.DeleteBook(bookId)
-	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
+	result := agent.DeleteBook(bookId, BookState(state))
+	context.JSON(http.StatusOK, gin.H{"state": result.Status, "msg": result.Msg})
 }
 
 func returnBookHandler(context *gin.Context) {
@@ -92,13 +92,7 @@ func getAllBorrowBooksHandler(context *gin.Context) {
 		return
 	}
 	books := agent.GetBorrowBooksByPage(page)
-
-	bf := bytes.NewBuffer([]byte{})
-	encoder := json.NewEncoder(bf)
-	encoder.SetEscapeHTML(false)
-	_ = encoder.Encode(books)
-
-	_, _ = context.Writer.Write(bf.Bytes())
+	_, _ = context.Writer.Write(util.JsonEncode(books))
 }
 
 // FIXME:UNTESTED
@@ -208,13 +202,7 @@ func getAllMembersHandler(context *gin.Context) {
 		return
 	}
 	users := agent.GetMembersByPage(page)
-
-	bf := bytes.NewBuffer([]byte{})
-	encoder := json.NewEncoder(bf)
-	encoder.SetEscapeHTML(false)
-	_ = encoder.Encode(users)
-
-	_, _ = context.Writer.Write(bf.Bytes())
+	_, _ = context.Writer.Write(util.JsonEncode(users))
 }
 
 func getMembersHasDebtPagesHandler(context *gin.Context) {
@@ -229,11 +217,86 @@ func getMembersHasDebtHandler(context *gin.Context) {
 		return
 	}
 	users := agent.GetMembersHasDebtByPage(page)
+	_, _ = context.Writer.Write(util.JsonEncode(users))
+}
 
-	bf := bytes.NewBuffer([]byte{})
-	encoder := json.NewEncoder(bf)
-	encoder.SetEscapeHTML(false)
-	_ = encoder.Encode(users)
+func deleteMemberHandler(context *gin.Context) {
+	userIdStr := context.PostForm("userId")
+	userId, err := strconv.Atoi(userIdStr)
+	if err != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	result := agent.DeleteMember(userId)
+	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
+}
 
-	_, _ = context.Writer.Write(bf.Bytes())
+func addCategoryHandler(context *gin.Context) {
+	categoryName, ok := context.GetPostForm("category")
+	if !ok {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	result := agent.AddCategory(categoryName)
+	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
+}
+
+func addLocationHandler(context *gin.Context) {
+	locationName, ok := context.GetPostForm("location")
+	if !ok {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	result := agent.AddLocation(locationName)
+	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
+}
+
+func getMemberCountHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{"count": agent.GetMemberCount()})
+}
+
+func getBookCountByISBNHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{"count": agent.GetBookCountByISBN()})
+}
+
+func getBookCountByCopyHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{"count": agent.GetBookCountByCopy()})
+}
+
+func getCurrentBorrowCountHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{"count": agent.GetCurrentBorrowCount()})
+}
+
+func getHistoryBorrowCountHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{"count": agent.GetHistoryBorrowCount()})
+}
+
+func getDamagedBookCountHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{"count": agent.GetDamagedBookCount()})
+}
+
+func getLostBookCountHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{"count": agent.GetLostBookCount()})
+}
+
+func getUnpaidFineHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{"count": agent.GetUnpaidFine()})
+}
+
+func getPaidFineHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{"count": agent.GetPaidFine()})
+}
+
+func getHistoryFineListPagesHandler(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{"page": agent.GetHistoryFineListPages()})
+}
+
+func getHistoryFineListHandler(context *gin.Context) {
+	page, err := strconv.Atoi(context.PostForm("page"))
+	if err != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+	fineList := agent.GetHistoryFineListByPage(page)
+	_, _ = context.Writer.Write(util.JsonEncode(fineList))
 }

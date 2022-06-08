@@ -37,7 +37,7 @@ func (agent *Agent) UpdatePay() {
 		return nil
 	})
 	for _, userId := range userIdArr {
-		agent.GetMemberFine(userId)
+		GetMemberFine(agent.DB, userId)
 	}
 }
 

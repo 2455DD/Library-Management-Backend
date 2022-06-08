@@ -6,13 +6,14 @@ import (
 	"net/http"
 )
 
+const defaultPassword = "1234"
+
 func registerHandler(context *gin.Context) {
 	username := context.PostForm("username")
-	password := "1234"
 	email := context.PostForm("email")
 	user := User{
 		Username: username,
-		Password: password,
+		Password: defaultPassword,
 		Email:    email,
 		Debt:     0,
 	}

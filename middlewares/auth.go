@@ -12,22 +12,6 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-func UserAuth() gin.HandlerFunc {
-	return func(context *gin.Context) {
-		if userID, ok := auth(context, util.UserKey); ok {
-			context.Set("userId", userID)
-			context.Next()
-		} else {
-			if userID, ok = auth(context, util.AdminKey); ok {
-				context.Set("userId", userID)
-				context.Next()
-			} else {
-				context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"msg": "Unauthorized"})
-			}
-		}
-	}
-}
-
 func MemberAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if userID, ok := auth(c, util.UserKey); ok {
