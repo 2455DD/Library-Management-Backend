@@ -152,6 +152,8 @@ const (
 	AddLocationOK
 	UpdateEmailFailed
 	UpdateEmailOK
+	SearchFailed
+	SearchOK
 )
 
 var (

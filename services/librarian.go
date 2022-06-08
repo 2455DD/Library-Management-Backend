@@ -18,6 +18,11 @@ type BorrowData struct {
 	UserId int
 }
 
+type ReserveData struct {
+	ReserveBookStatus
+	UserId int
+}
+
 type UserData struct {
 	Id       int
 	Username string
@@ -162,6 +167,132 @@ func (agent *DBAgent) GetBorrowBooksByPage(page int) []BorrowData {
 		return nil
 	})
 	return borrowDataArr
+}
+
+func (agent *DBAgent) GetMemberActiveBorrowHistoryByPage(page int, userID int) []BorrowData {
+	borrowDataArr := make([]BorrowData, 0)
+	borrowBooks := make([]BorrowBook, 0)
+	_ = agent.DB.Transaction(
+		func(tx *gorm.DB) error {
+			tx.Offset((page-1)*10).Limit(10).
+				Where("user_id = ? AND NOW() <= DATE_ADD(borrow.createtime,INTERVAL 10 DAY)", userID).Find(&borrowBooks)
+			for _, borrowBook := range borrowBooks {
+				book := Book{}
+				if err := tx.First(&book, borrowBook.BookId).Error; err == nil {
+					status := BorrowBookStatus{}
+					status.Book = book
+					status.StartTime = borrowBook.StartTime
+					status.EndTime = borrowBook.EndTime
+					deadline := util.StringToTime(borrowBook.StartTime).Add(time.Hour * 240)
+					status.Deadline = deadline.Format(util.GormTimeFormat)
+					status.Fine = CalculateFine(status)
+
+					data := BorrowData{}
+					data.BorrowBookStatus = status
+					data.UserId = borrowBook.UserId
+
+					borrowDataArr = append(borrowDataArr, data)
+				}
+			}
+			return nil
+		})
+	return borrowDataArr
+}
+
+func (agent *DBAgent) GetMemberOverdueHistoryByPage(page int, userID int) []BorrowData {
+	borrowDataArr := make([]BorrowData, 0)
+	borrowBooks := make([]BorrowBook, 0)
+	_ = agent.DB.Transaction(
+		func(tx *gorm.DB) error {
+			tx.Offset((page-1)*10).Limit(10).
+				Where("user_id = ? AND NOW() >= DATE_ADD(borrow.createtime,INTERVAL 10 DAY)  AND endtime IS NULL",
+					userID).Find(&borrowBooks)
+			for _, borrowBook := range borrowBooks {
+				book := Book{}
+				if err := tx.First(&book, borrowBook.BookId).Error; err == nil {
+					status := BorrowBookStatus{}
+					status.Book = book
+					status.StartTime = borrowBook.StartTime
+					status.EndTime = borrowBook.EndTime
+					deadline := util.StringToTime(borrowBook.StartTime).Add(time.Hour * 240)
+					status.Deadline = deadline.Format(util.GormTimeFormat)
+					status.Fine = CalculateFine(status)
+
+					data := BorrowData{}
+					data.BorrowBookStatus = status
+					data.UserId = borrowBook.UserId
+
+					borrowDataArr = append(borrowDataArr, data)
+				}
+			}
+			return nil
+		})
+	return borrowDataArr
+}
+
+func (agent *DBAgent) GetMemberReserveHistoryByPage(page int, userID int) []ReserveData {
+
+	reserveData := make([]ReserveBook, 0)
+	reserveBookData := make([]ReserveData, 0)
+	_ = agent.DB.Transaction(
+		func(tx *gorm.DB) error {
+			tx.Offset((page-1)*10).Limit(10).
+				Where("user_id = ? AND endtime IS NULL)", userID).Find(&reserveData)
+			for _, reserveEntry := range reserveData {
+				book := Book{}
+				if err := tx.First(&book, reserveEntry.BookId).Error; err == nil {
+					status := ReserveBookStatus{}
+					status.Book = book
+					status.StartTime = reserveEntry.StartTime
+					status.EndTime = reserveEntry.EndTime
+
+					data := ReserveData{}
+					data.ReserveBookStatus = status
+					data.UserId = reserveEntry.UserId
+
+					reserveBookData = append(reserveBookData, data)
+				}
+			}
+			return nil
+		})
+	return reserveBookData
+}
+
+func (agent DBAgent) GetMemberReturnHistoryByPage(page int, userID int) []BorrowData {
+	// FIXME:WARNING,UNTESTED
+	borrowDataArr := make([]BorrowData, 0)
+	borrowBooks := make([]BorrowBook, 0)
+	_ = agent.DB.Transaction(
+		func(tx *gorm.DB) error {
+			tx.Offset((page-1)*10).Limit(10).
+				Where("user_id = ? AND endtime IS NOT NULL",
+					userID).Find(&borrowBooks)
+			for _, borrowBook := range borrowBooks {
+				book := Book{}
+				if err := tx.First(&book, borrowBook.BookId).Error; err == nil {
+					status := BorrowBookStatus{}
+					status.Book = book
+					status.StartTime = borrowBook.StartTime
+					status.EndTime = borrowBook.EndTime
+					deadline := util.StringToTime(borrowBook.StartTime).Add(time.Hour * 240)
+					status.Deadline = deadline.Format(util.GormTimeFormat)
+					status.Fine = CalculateFine(status)
+
+					data := BorrowData{}
+					data.BorrowBookStatus = status
+					data.UserId = borrowBook.UserId
+
+					borrowDataArr = append(borrowDataArr, data)
+				}
+			}
+			return nil
+		})
+	return borrowDataArr
+}
+
+func (agent *DBAgent) GetMemberFineHistoryByPage(page int, userID int) {
+	//TODO: DO THE FUCKING ME!
+
 }
 
 func (agent *DBAgent) GetMemberPages() int64 {

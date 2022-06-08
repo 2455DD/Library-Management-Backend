@@ -83,6 +83,22 @@ func cancelReserveBookHandler(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"status": result.Status, "msg": result.Msg})
 }
 
+func getReaderDashboardHandler(context *gin.Context) {
+	iUserId, _ := context.Get("userId")
+	userId := iUserId.(int)
+	result := agent.CountCurrentBorrowedBooks(userId) //历史借阅的图书量
+	borrowedBookCount := result.Msg
+	result = agent.TotalFineAmount(userId) //总罚款数量
+	Totalfine := result.Msg
+	result = agent.CountHistoryReservedBooks(userId) //历史预定图书量
+	historyReservedBookCount := result.Msg
+	result = agent.CountCurrentReservedBooks(userId) //历史预定图书量
+	currentReservedBookCount := result.Msg
+	result = agent.LastReturnBook(userId) //最后归还的图书
+	lastReturnBook := result.Msg
+	context.JSON(http.StatusOK, gin.H{"status": result.Status, "Current Borrowed books": borrowedBookCount, "Total Fine Amount": Totalfine, "History Reserve books": historyReservedBookCount, "Current Reserve books": currentReservedBookCount, "Last Return Books": lastReturnBook})
+}
+
 func getMemberHistoryBorrowTimeHandler(context *gin.Context) {
 	iUserId, _ := context.Get("userId")
 	userId := iUserId.(int)
