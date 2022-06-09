@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"github.com/smartwalle/alipay/v3"
 	"gorm.io/gorm"
 	"lms/util"
@@ -237,9 +238,13 @@ func (agent *DBAgent) ReturnBook(bookId int) StatusResult {
 
 func (agent *DBAgent) ReserveBook(userId int, bookId int) StatusResult {
 	result := StatusResult{}
+	user := User{}
+	book := Book{}
 	err := agent.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.First(&user, userId).Error; err != nil {
+			return err
+		}
 		// 判断图书状态
-		book := Book{}
 		if err := tx.First(&book, bookId).Error; err != nil {
 			return err
 		}
@@ -277,14 +282,22 @@ func (agent *DBAgent) ReserveBook(userId int, bookId int) StatusResult {
 	} else {
 		result.Status = ReserveOK
 		result.Msg = "预约成功"
+		title := "预约图书成功"
+		endTime := time.Now().Add(time.Hour * time.Duration(ReserveHours))
+		content := fmt.Sprintf("您成功预约图书《%s》，请在%s前取出图书", book.Name, util.TimeToString(endTime))
+		go SendEmail(user.Email, title, content)
 	}
 	return result
 }
 
 func (agent *DBAgent) CancelReserveBook(userId int, bookId int) StatusResult {
 	result := StatusResult{}
+	user := User{}
+	book := Book{}
 	err := agent.DB.Transaction(func(tx *gorm.DB) error {
-		book := Book{}
+		if err := tx.First(&user, userId).Error; err != nil {
+			return err
+		}
 		if err := tx.First(&book, bookId).Error; err != nil {
 			return err
 		}
@@ -316,6 +329,9 @@ func (agent *DBAgent) CancelReserveBook(userId int, bookId int) StatusResult {
 	} else {
 		result.Status = CancelReserveOK
 		result.Msg = "取消预约成功"
+		title := "取消预约图书成功"
+		content := fmt.Sprintf("您已取消预约图书《%s》", book.Name)
+		go SendEmail(user.Email, title, content)
 	}
 	return result
 }

@@ -56,19 +56,20 @@ func (agent *Agent) UpdateReserve() {
 				tx.First(&user, reserve.UserId)
 				book := Book{}
 				tx.First(&book, reserve.BookId)
+				title := "Automatic reservation cancellation notice"
 				content := fmt.Sprintf("The book 《%s》 you reserved at %s has been cancelled at %s", book.Name, util.TimeToString(util.StringToTime(reserve.StartTime)), reserve.EndTime)
-				go sendEmail(user.Email, content)
+				go SendEmail(user.Email, title, content)
 			}
 		}
 		return nil
 	})
 }
 
-func sendEmail(toEmail string, content string) {
+func SendEmail(toEmail string, title string, content string) {
 	m := gomail.NewMessage()
 	m.SetHeader("From", "386401059@qq.com")
 	m.SetHeader("To", toEmail)
-	m.SetHeader("Subject", "Automatic reservation cancellation notice")
+	m.SetHeader("Subject", title)
 	m.SetBody("text/html", content)
 
 	d := gomail.NewDialer("smtp.qq.com", 465, "386401059@qq.com", "fqiqwnwnjbvhbgbg")
