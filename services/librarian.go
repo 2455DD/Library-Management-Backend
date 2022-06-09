@@ -585,8 +585,9 @@ func (agent *DBAgent) GetHistoryFineListByPage(page int) []FineData {
 		tx.Offset((page - 1) * itemsPerPage).Limit(itemsPerPage).Find(&pays)
 		for _, pay := range pays {
 			fineData := FineData{
-				Fine: pay.Amount,
-				Done: pay.Done,
+				UserId: pay.UserId,
+				Fine:   pay.Amount,
+				Done:   pay.Done,
 			}
 			fineDataArr = append(fineDataArr, fineData)
 		}

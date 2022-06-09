@@ -51,7 +51,7 @@ func (agent *DBAgent) GetMemberBorrowBooksPages(userId int) int64 {
 	if err := agent.DB.Table("borrow").Where("user_id = ?", userId).Count(&count).Error; err != nil {
 		return 0
 	}
-	return (count - 1) / itemsPerPage + 1
+	return (count-1)/itemsPerPage + 1
 }
 
 func CalculateDayDiff(startTime time.Time, endTime time.Time) int {
@@ -100,7 +100,7 @@ func (agent *DBAgent) GetMemberReserveBooksPages(userId int) int64 {
 	if err := agent.DB.Table("reserve").Where("user_id = ?", userId).Count(&count).Error; err != nil {
 		return 0
 	}
-	return (count - 1) / itemsPerPage + 1
+	return (count-1)/itemsPerPage + 1
 }
 
 func (agent *DBAgent) GetMemberReserveBooks(userId int, page int) []ReserveBookStatus {
@@ -582,7 +582,7 @@ func (agent *DBAgent) GetMemberHistoryFineListPages(userId int) int64 {
 	if err := agent.DB.Table("pay").Where("user_id = ?", userId).Count(&count).Error; err != nil {
 		return 0
 	}
-	return (count - 1) / itemsPerPage + 1
+	return (count-1)/itemsPerPage + 1
 }
 
 func (agent *DBAgent) GetMemberHistoryFineListByPage(userId int, page int) []FineData {
@@ -592,8 +592,9 @@ func (agent *DBAgent) GetMemberHistoryFineListByPage(userId int, page int) []Fin
 		tx.Where("user_id = ?", userId).Offset((page - 1) * itemsPerPage).Limit(itemsPerPage).Find(&pays)
 		for _, pay := range pays {
 			fineData := FineData{
-				Fine:      pay.Amount,
-				Done:      pay.Done,
+				UserId: userId,
+				Fine:   pay.Amount,
+				Done:   pay.Done,
 			}
 			fineDataArr = append(fineDataArr, fineData)
 		}
