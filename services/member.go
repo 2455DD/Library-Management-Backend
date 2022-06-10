@@ -383,7 +383,7 @@ func GetMemberHistoryFine(db *gorm.DB, userId int) int {
 	borrowBooks := make([]BorrowBook, 0)
 	fine := 0
 	_ = db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("user_id = ?", userId).Find(&borrowBooks).Error; err != nil {
+		if err := tx.Where("user_id = ? and fine > -1", userId).Find(&borrowBooks).Error; err != nil {
 			return err
 		}
 		for _, borrowBook := range borrowBooks {
