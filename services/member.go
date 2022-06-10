@@ -487,6 +487,7 @@ func (agent *DBAgent) GetMemberHistoryFineListByPage(userId int, page int) []Fin
 		tx.Where("user_id = ? and done > -1", userId).Offset((page - 1) * itemsPerPage).Limit(itemsPerPage).Find(&pays)
 		for _, pay := range pays {
 			fineData := FineData{
+				UserId:    userId,
 				Fine:      pay.Amount,
 				Done:      pay.Done,
 			}

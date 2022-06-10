@@ -70,6 +70,7 @@ type Category struct {
 }
 
 type FineData struct {
+	UserId    int
 	Fine      int
 	Done      int
 }
